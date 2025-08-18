@@ -1,0 +1,57 @@
+services:
+  db:
+    image: mariadb:10.6
+    environment:
+      MARIADB_DATABASE: algorithm_hub
+      MARIADB_USER: algouser
+      MARIADB_PASSWORD: algopass
+      MARIADB_ROOT_PASSWORD: rootpass
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+    depends_on:
+      - db
+    ports:
+      - "8087:80"
+
+#  backend:
+#    build: ./backend
+#    env_file:
+#      - ./backend/.env
+#    environment:
+#      DB_HOST: db
+#      DB_PORT: 3306
+#      DB_USER: algouser
+#      DB_PASSWORD: algopass
+#      DB_NAME: algorithm_hub
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#    ports:
+#      - "3000:3000"
+#
+#  frontend:
+#    build: ./frontend
+#    environment:
+#      - NODE_OPTIONS=--openssl-legacy-provider
+#    ports:
+#      - "4200:80"
+#    depends_on:
+#      - backend
+
+volumes:
+  db_data:

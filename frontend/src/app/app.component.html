@@ -1,0 +1,37 @@
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->
+<!-- * * * * * * * to get started with your project! * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+
+<header class="bg-white border-b">
+  <nav class="container h-14 flex items-center justify-between">
+    <a routerLink="/" class="font-semibold text-gray-900">Algorithm Hub</a>
+    <div class="flex items-center gap-4">
+      <a routerLink="/algorithms" class="text-sm text-gray-700 hover:text-gray-900">Algoritmos</a>
+      <a routerLink="/progress" class="text-sm text-gray-700 hover:text-gray-900">Progreso</a>
+      <ng-container *ngIf="user$ | async as user; else loggedOut">
+        <span class="hidden sm:inline text-sm text-gray-500">Hola, {{ user.name }}</span>
+        <button class="btn btn-secondary btn-sm" (click)="logout()">Salir</button>
+      </ng-container>
+      <ng-template #loggedOut>
+        <a routerLink="/auth/login" class="btn btn-outline btn-sm">Entrar</a>
+        <a routerLink="/auth/register" class="btn btn-primary btn-sm">Registro</a>
+      </ng-template>
+    </div>
+  </nav>
+</header>
+<main class="container py-6">
+  <router-outlet />
+</main>
+
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->
+<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->
+<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->

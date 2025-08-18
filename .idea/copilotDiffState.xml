@@ -328,8 +328,8 @@
           <value>
             <PendingDiffInfo>
               <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/app.routes.ts" />
-              <option name="originalContent" value="import { Routes } from '@angular/router';&#10;import { authGuard } from './app/core/guards/auth.guard';&#10;&#10;export const routes: Routes = [&#10;  { path: '', pathMatch: 'full', redirectTo: 'algorithms' },&#10;  {&#10;    path: 'auth',&#10;    children: [&#10;      { path: 'login', loadComponent: () =&gt; import('./features/auth/login.component').then(m =&gt; m.LoginComponent) },&#10;      { path: 'register', loadComponent: () =&gt; import('./features/auth/register.component').then(m =&gt; m.RegisterComponent) },&#10;    ],&#10;  },&#10;  {&#10;    path: 'algorithms',&#10;    children: [&#10;      { path: '', loadComponent: () =&gt; import('./features/algorithms/algorithms-list.component').then(m =&gt; m.AlgorithmsListComponent) },&#10;      { path: ':slug', loadComponent: () =&gt; import('./features/algorithms/algorithm-detail.component').then(m =&gt; m.AlgorithmDetailComponent) },&#10;    ],&#10;  },&#10;  { path: 'progress', canActivate: [authGuard], loadComponent: () =&gt; import('./features/progress/progress.component').then(m =&gt; m.ProgressComponent) },&#10;  { path: '**', redirectTo: 'algorithms' },&#10;];&#10;" />
-              <option name="updatedContent" value="import { Routes } from '@angular/router';&#10;import { authGuard } from './core/guards/auth.guard';&#10;&#10;export const routes: Routes = [&#10;  { path: '', pathMatch: 'full', redirectTo: 'algorithms' },&#10;  {&#10;    path: 'auth',&#10;    children: [&#10;      { path: 'login', loadComponent: () =&gt; import('./features/auth/login.component').then(m =&gt; m.LoginComponent) },&#10;      { path: 'register', loadComponent: () =&gt; import('./features/auth/register.component').then(m =&gt; m.RegisterComponent) },&#10;    ],&#10;  },&#10;  {&#10;    path: 'algorithms',&#10;    children: [&#10;      { path: '', loadComponent: () =&gt; import('./features/algorithms/algorithms-list.component').then(m =&gt; m.AlgorithmsListComponent) },&#10;      { path: ':slug', loadComponent: () =&gt; import('./features/algorithms/algorithm-detail.component').then(m =&gt; m.AlgorithmDetailComponent) },&#10;    ],&#10;  },&#10;  { path: 'progress', canActivate: [authGuard], loadComponent: () =&gt; import('./features/progress/progress.component').then(m =&gt; m.ProgressComponent) },&#10;  { path: '**', redirectTo: 'algorithms' },&#10;];" />
+              <option name="originalContent" value="import { Routes } from '@angular/router';&#10;import { authGuard } from './core/guards/auth.guard';&#10;&#10;export const routes: Routes = [&#10;  { path: '', pathMatch: 'full', redirectTo: 'algorithms' },&#10;  {&#10;    path: 'auth',&#10;    children: [&#10;      { path: 'login', loadComponent: () =&gt; import('./features/auth/login.component').then(m =&gt; m.LoginComponent) },&#10;      { path: 'register', loadComponent: () =&gt; import('./features/auth/register.component').then(m =&gt; m.RegisterComponent) },&#10;    ],&#10;  },&#10;  {&#10;    path: 'algorithms',&#10;    children: [&#10;      { path: '', loadComponent: () =&gt; import('./features/algorithms/algorithms-list.component').then(m =&gt; m.AlgorithmsListComponent) },&#10;      // Rutas personalizadas por algoritmo&#10;      { path: 'bubble-sort', loadComponent: () =&gt; import('./features/algorithms/custom/bubble-sort.component').then(m =&gt; m.BubbleSortComponent) },&#10;      { path: 'insertion-sort', loadComponent: () =&gt; import('./features/algorithms/custom/insertion-sort.component').then(m =&gt; m.InsertionSortComponent) },&#10;      { path: 'selection-sort', loadComponent: () =&gt; import('./features/algorithms/custom/selection-sort.component').then(m =&gt; m.SelectionSortComponent) },&#10;      { path: 'merge-sort', loadComponent: () =&gt; import('./features/algorithms/custom/merge-sort.component').then(m =&gt; m.MergeSortComponent) },&#10;      { path: 'quick-sort', loadComponent: () =&gt; import('./features/algorithms/custom/quick-sort.component').then(m =&gt; m.QuickSortComponent) },&#10;      { path: 'binary-search', loadComponent: () =&gt; import('./features/algorithms/custom/binary-search.component').then(m =&gt; m.BinarySearchComponent) },&#10;      { path: 'breadth-first-search', loadComponent: () =&gt; import('./features/algorithms/custom/breadth-first-search.component').then(m =&gt; m.BreadthFirstSearchComponent) },&#10;      { path: 'depth-first-search', loadComponent: () =&gt; import('./features/algorithms/custom/depth-first-search.component').then(m =&gt; m.DepthFirstSearchComponent) },&#10;      { path: 'dijkstra', loadComponent: () =&gt; import('./features/algorithms/custom/dijkstra.component').then(m =&gt; m.DijkstraComponent) },&#10;      { path: 'bellman-ford', loadComponent: () =&gt; import('./features/algorithms/custom/bellman-ford.component').then(m =&gt; m.BellmanFordComponent) },&#10;      { path: 'floyd-warshall', loadComponent: () =&gt; import('./features/algorithms/custom/floyd-warshall.component').then(m =&gt; m.FloydWarshallComponent) },&#10;      { path: 'kruskal', loadComponent: () =&gt; import('./features/algorithms/custom/kruskal.component').then(m =&gt; m.KruskalComponent) },&#10;      { path: 'prim', loadComponent: () =&gt; import('./features/algorithms/custom/prim.component').then(m =&gt; m.PrimComponent) },&#10;      { path: 'kmp', loadComponent: () =&gt; import('./features/algorithms/custom/kmp.component').then(m =&gt; m.KmpComponent) },&#10;      { path: 'rabin-karp', loadComponent: () =&gt; import('./features/algorithms/custom/rabin-karp.component').then(m =&gt; m.RabinKarpComponent) },&#10;      { path: 'knapsack-01', loadComponent: () =&gt; import('./features/algorithms/custom/knapsack-01.component').then(m =&gt; m.Knapsack01Component) },&#10;      { path: 'lis', loadComponent: () =&gt; import('./features/algorithms/custom/lis.component').then(m =&gt; m.LisComponent) },&#10;      { path: 'topological-sort', loadComponent: () =&gt; import('./features/algorithms/custom/topological-sort.component').then(m =&gt; m.TopologicalSortComponent) },&#10;      { path: 'activity-selection', loadComponent: () =&gt; import('./features/algorithms/custom/activity-selection.component').then(m =&gt; m.ActivitySelectionComponent) },&#10;      { path: 'binary-tree-traversals', loadComponent: () =&gt; import('./features/algorithms/custom/binary-tree-traversals.component').then(m =&gt; m.BinaryTreeTraversalsComponent) },&#10;      // Fallback genérico&#10;      { path: ':slug', loadComponent: () =&gt; import('./features/algorithms/algorithm-detail.component').then(m =&gt; m.AlgorithmDetailComponent) },&#10;    ],&#10;  },&#10;  { path: 'progress', canActivate: [authGuard], loadComponent: () =&gt; import('./features/progress/progress.component').then(m =&gt; m.ProgressComponent) },&#10;  { path: '**', redirectTo: 'algorithms' },&#10;];&#10;" />
+              <option name="updatedContent" value="import { Routes } from '@angular/router';&#10;import { authGuard } from './core/guards/auth.guard';&#10;// Type-only imports para que TS resuelva rutas lazy sin afectar el runtime&#10;import type { BubbleSortComponent } from './features/algorithms/custom/bubble-sort.component';&#10;import type { InsertionSortComponent } from './features/algorithms/custom/insertion-sort.component';&#10;import type { SelectionSortComponent } from './features/algorithms/custom/selection-sort.component';&#10;import type { MergeSortComponent } from './features/algorithms/custom/merge-sort.component';&#10;import type { QuickSortComponent } from './features/algorithms/custom/quick-sort.component';&#10;import type { BinarySearchComponent } from './features/algorithms/custom/binary-search.component';&#10;import type { BreadthFirstSearchComponent } from './features/algorithms/custom/breadth-first-search.component';&#10;import type { DepthFirstSearchComponent } from './features/algorithms/custom/depth-first-search.component';&#10;import type { DijkstraComponent } from './features/algorithms/custom/dijkstra.component';&#10;import type { BellmanFordComponent } from './features/algorithms/custom/bellman-ford.component';&#10;import type { FloydWarshallComponent } from './features/algorithms/custom/floyd-warshall.component';&#10;import type { KruskalComponent } from './features/algorithms/custom/kruskal.component';&#10;import type { PrimComponent } from './features/algorithms/custom/prim.component';&#10;import type { KmpComponent } from './features/algorithms/custom/kmp.component';&#10;import type { RabinKarpComponent } from './features/algorithms/custom/rabin-karp.component';&#10;import type { Knapsack01Component } from './features/algorithms/custom/knapsack-01.component';&#10;import type { LisComponent } from './features/algorithms/custom/lis.component';&#10;import type { TopologicalSortComponent } from './features/algorithms/custom/topological-sort.component';&#10;import type { ActivitySelectionComponent } from './features/algorithms/custom/activity-selection.component';&#10;import type { BinaryTreeTraversalsComponent } from './features/algorithms/custom/binary-tree-traversals.component';&#10;&#10;export const routes: Routes = [&#10;  { path: '', pathMatch: 'full', redirectTo: 'algorithms' },&#10;  {&#10;    path: 'auth',&#10;    children: [&#10;      { path: 'login', loadComponent: () =&gt; import('./features/auth/login.component').then(m =&gt; m.LoginComponent) },&#10;      { path: 'register', loadComponent: () =&gt; import('./features/auth/register.component').then(m =&gt; m.RegisterComponent) },&#10;    ],&#10;  },&#10;  {&#10;    path: 'algorithms',&#10;    children: [&#10;      { path: '', loadComponent: () =&gt; import('./features/algorithms/algorithms-list.component').then(m =&gt; m.AlgorithmsListComponent) },&#10;      // Rutas personalizadas por algoritmo&#10;      { path: 'bubble-sort', loadComponent: () =&gt; import('./features/algorithms/custom/bubble-sort.component').then(m =&gt; m.BubbleSortComponent) },&#10;      { path: 'insertion-sort', loadComponent: () =&gt; import('./features/algorithms/custom/insertion-sort.component').then(m =&gt; m.InsertionSortComponent) },&#10;      { path: 'selection-sort', loadComponent: () =&gt; import('./features/algorithms/custom/selection-sort.component').then(m =&gt; m.SelectionSortComponent) },&#10;      { path: 'merge-sort', loadComponent: () =&gt; import('./features/algorithms/custom/merge-sort.component').then(m =&gt; m.MergeSortComponent) },&#10;      { path: 'quick-sort', loadComponent: () =&gt; import('./features/algorithms/custom/quick-sort.component').then(m =&gt; m.QuickSortComponent) },&#10;      { path: 'binary-search', loadComponent: () =&gt; import('./features/algorithms/custom/binary-search.component').then(m =&gt; m.BinarySearchComponent) },&#10;      { path: 'breadth-first-search', loadComponent: () =&gt; import('./features/algorithms/custom/breadth-first-search.component').then(m =&gt; m.BreadthFirstSearchComponent) },&#10;      { path: 'depth-first-search', loadComponent: () =&gt; import('./features/algorithms/custom/depth-first-search.component').then(m =&gt; m.DepthFirstSearchComponent) },&#10;      { path: 'dijkstra', loadComponent: () =&gt; import('./features/algorithms/custom/dijkstra.component').then(m =&gt; m.DijkstraComponent) },&#10;      { path: 'bellman-ford', loadComponent: () =&gt; import('./features/algorithms/custom/bellman-ford.component').then(m =&gt; m.BellmanFordComponent) },&#10;      { path: 'floyd-warshall', loadComponent: () =&gt; import('./features/algorithms/custom/floyd-warshall.component').then(m =&gt; m.FloydWarshallComponent) },&#10;      { path: 'kruskal', loadComponent: () =&gt; import('./features/algorithms/custom/kruskal.component').then(m =&gt; m.KruskalComponent) },&#10;      { path: 'prim', loadComponent: () =&gt; import('./features/algorithms/custom/prim.component').then(m =&gt; m.PrimComponent) },&#10;      { path: 'kmp', loadComponent: () =&gt; import('./features/algorithms/custom/kmp.component').then(m =&gt; m.KmpComponent) },&#10;      { path: 'rabin-karp', loadComponent: () =&gt; import('./features/algorithms/custom/rabin-karp.component').then(m =&gt; m.RabinKarpComponent) },&#10;      { path: 'knapsack-01', loadComponent: () =&gt; import('./features/algorithms/custom/knapsack-01.component').then(m =&gt; m.Knapsack01Component) },&#10;      { path: 'lis', loadComponent: () =&gt; import('./features/algorithms/custom/lis.component').then(m =&gt; m.LisComponent) },&#10;      { path: 'topological-sort', loadComponent: () =&gt; import('./features/algorithms/custom/topological-sort.component').then(m =&gt; m.TopologicalSortComponent) },&#10;      { path: 'activity-selection', loadComponent: () =&gt; import('./features/algorithms/custom/activity-selection.component').then(m =&gt; m.ActivitySelectionComponent) },&#10;      { path: 'binary-tree-traversals', loadComponent: () =&gt; import('./features/algorithms/custom/binary-tree-traversals.component').then(m =&gt; m.BinaryTreeTraversalsComponent) },&#10;      // Fallback genérico&#10;      { path: ':slug', loadComponent: () =&gt; import('./features/algorithms/algorithm-detail.component').then(m =&gt; m.AlgorithmDetailComponent) },&#10;    ],&#10;  },&#10;  { path: 'progress', canActivate: [authGuard], loadComponent: () =&gt; import('./features/progress/progress.component').then(m =&gt; m.ProgressComponent) },&#10;  { path: '**', redirectTo: 'algorithms' },&#10;];" />
             </PendingDiffInfo>
           </value>
         </entry>
@@ -404,6 +404,304 @@
               <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/algorithms-list.component.ts" />
               <option name="originalContent" value="import { Component, OnInit, inject, signal } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { AlgorithmsService, Algorithm, PagedResult } from '../../core/algorithms/algorithms.service';&#10;import { FormsModule } from '@angular/forms';&#10;import { RouterLink } from '@angular/router';&#10;import { ProgressService } from '../../core/progress/progress.service';&#10;import { AuthService } from '../../core/auth/auth.service';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'app-algorithms-list',&#10;  imports: [CommonModule, FormsModule, RouterLink],&#10;  template: `&#10;    &lt;h2&gt;Algoritmos&lt;/h2&gt;&#10;    &lt;div class=&quot;filters&quot;&gt;&#10;      &lt;input type=&quot;text&quot; [(ngModel)]=&quot;search&quot; placeholder=&quot;Buscar...&quot; (ngModelChange)=&quot;refresh()&quot; /&gt;&#10;      &lt;select [(ngModel)]=&quot;category&quot; (change)=&quot;refresh()&quot;&gt;&#10;        &lt;option value=&quot;&quot;&gt;Todas las categorías&lt;/option&gt;&#10;        &lt;option value=&quot;sorting&quot;&gt;Sorting&lt;/option&gt;&#10;        &lt;option value=&quot;search&quot;&gt;Search&lt;/option&gt;&#10;        &lt;option value=&quot;graph&quot;&gt;Graph&lt;/option&gt;&#10;        &lt;option value=&quot;dp&quot;&gt;DP&lt;/option&gt;&#10;        &lt;option value=&quot;string&quot;&gt;String&lt;/option&gt;&#10;        &lt;option value=&quot;greedy&quot;&gt;Greedy&lt;/option&gt;&#10;        &lt;option value=&quot;tree&quot;&gt;Tree&lt;/option&gt;&#10;      &lt;/select&gt;&#10;    &lt;/div&gt;&#10;&#10;    &lt;div *ngIf=&quot;loading&quot;&gt;Cargando...&lt;/div&gt;&#10;&#10;    &lt;ul&gt;&#10;      &lt;li *ngFor=&quot;let a of items&quot;&gt;&#10;        &lt;a [routerLink]=&quot;['/algorithms', a.slug]&quot;&gt;{{ a.name }}&lt;/a&gt;&#10;        &lt;small&gt;({{ a.category }} · {{ a.difficulty }})&lt;/small&gt;&#10;        &lt;button *ngIf=&quot;auth.isAuthenticated&quot; (click)=&quot;toggle(a)&quot; [disabled]=&quot;toggling === a.slug&quot;&gt;&#10;          {{ isLearned(a.slug) ? 'Desmarcar' : 'Aprendido' }}&#10;        &lt;/button&gt;&#10;      &lt;/li&gt;&#10;    &lt;/ul&gt;&#10;&#10;    &lt;div class=&quot;pager&quot; *ngIf=&quot;total &gt; pageSize&quot;&gt;&#10;      &lt;button (click)=&quot;prev()&quot; [disabled]=&quot;page===1&quot;&gt;Anterior&lt;/button&gt;&#10;      &lt;span&gt;Página {{ page }} / {{ totalPages }}&lt;/span&gt;&#10;      &lt;button (click)=&quot;next()&quot; [disabled]=&quot;page===totalPages&quot;&gt;Siguiente&lt;/button&gt;&#10;    &lt;/div&gt;&#10;  `,&#10;  styles: [&#10;    `&#10;      .filters { display: flex; gap: .5rem; margin: .5rem 0; }&#10;      ul { list-style: none; padding: 0; }&#10;      li { margin: .25rem 0; }&#10;      .pager { display:flex; gap:.5rem; align-items:center; }&#10;    `,&#10;  ],&#10;})&#10;export class AlgorithmsListComponent implements OnInit {&#10;  private algos = inject(AlgorithmsService);&#10;  protected progress = inject(ProgressService);&#10;  protected auth = inject(AuthService);&#10;&#10;  items: Algorithm[] = [];&#10;  total = 0;&#10;  page = 1;&#10;  pageSize = 10;&#10;  search = '';&#10;  category = '';&#10;  loading = false;&#10;  toggling: string | null = null;&#10;  learnedSlugs = new Set&lt;string&gt;();&#10;&#10;  get totalPages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); }&#10;&#10;  ngOnInit() {&#10;    if (this.auth.isAuthenticated) {&#10;      this.progress.getLearned().subscribe((res) =&gt; (this.learnedSlugs = res.slugs));&#10;    }&#10;    this.refresh();&#10;  }&#10;&#10;  isLearned(slug: string) { return this.learnedSlugs.has(slug); }&#10;&#10;  refresh() {&#10;    this.loading = true;&#10;    this.algos.list({ search: this.search, category: this.category || undefined, page: this.page, pageSize: this.pageSize }).subscribe({&#10;      next: (res: PagedResult&lt;Algorithm&gt;) =&gt; {&#10;        this.items = res.items; this.total = res.total; this.page = res.page; this.pageSize = res.pageSize; this.loading = false;&#10;      },&#10;      error: () =&gt; { this.loading = false; },&#10;    });&#10;  }&#10;&#10;  prev() { if (this.page &gt; 1) { this.page--; this.refresh(); } }&#10;  next() { if (this.page &lt; this.totalPages) { this.page++; this.refresh(); } }&#10;&#10;  toggle(a: Algorithm) {&#10;    if (!this.auth.isAuthenticated) return;&#10;    this.toggling = a.slug;&#10;    const obs = this.isLearned(a.slug) ? this.progress.unlearn(a.slug) : this.progress.learn(a.slug);&#10;    obs.subscribe({&#10;      next: () =&gt; {&#10;        if (this.isLearned(a.slug)) this.learnedSlugs.delete(a.slug); else this.learnedSlugs.add(a.slug);&#10;        this.toggling = null;&#10;      },&#10;      error: () =&gt; { this.toggling = null; },&#10;    });&#10;  }&#10;}&#10;&#10;" />
               <option name="updatedContent" value="import { Component, OnInit, inject, signal } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { AlgorithmsService, Algorithm, PagedResult } from '../../core/algorithms/algorithms.service';&#10;import { FormsModule } from '@angular/forms';&#10;import { RouterLink } from '@angular/router';&#10;import { ProgressService } from '../../core/progress/progress.service';&#10;import { AuthService } from '../../core/auth/auth.service';&#10;import { map } from 'rxjs/operators';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'app-algorithms-list',&#10;  imports: [CommonModule, FormsModule, RouterLink],&#10;  template: `&#10;    &lt;h2&gt;Algoritmos&lt;/h2&gt;&#10;    &lt;div class=&quot;filters&quot;&gt;&#10;      &lt;input type=&quot;text&quot; [(ngModel)]=&quot;search&quot; placeholder=&quot;Buscar...&quot; (ngModelChange)=&quot;refresh()&quot; /&gt;&#10;      &lt;select [(ngModel)]=&quot;category&quot; (change)=&quot;refresh()&quot;&gt;&#10;        &lt;option value=&quot;&quot;&gt;Todas las categorías&lt;/option&gt;&#10;        &lt;option value=&quot;sorting&quot;&gt;Sorting&lt;/option&gt;&#10;        &lt;option value=&quot;search&quot;&gt;Search&lt;/option&gt;&#10;        &lt;option value=&quot;graph&quot;&gt;Graph&lt;/option&gt;&#10;        &lt;option value=&quot;dp&quot;&gt;DP&lt;/option&gt;&#10;        &lt;option value=&quot;string&quot;&gt;String&lt;/option&gt;&#10;        &lt;option value=&quot;greedy&quot;&gt;Greedy&lt;/option&gt;&#10;        &lt;option value=&quot;tree&quot;&gt;Tree&lt;/option&gt;&#10;      &lt;/select&gt;&#10;    &lt;/div&gt;&#10;&#10;    &lt;div *ngIf=&quot;loading&quot;&gt;Cargando...&lt;/div&gt;&#10;&#10;    &lt;ul&gt;&#10;      &lt;li *ngFor=&quot;let a of items&quot;&gt;&#10;        &lt;a [routerLink]=&quot;['/algorithms', a.slug]&quot;&gt;{{ a.name }}&lt;/a&gt;&#10;        &lt;small&gt;({{ a.category }} · {{ a.difficulty }})&lt;/small&gt;&#10;        &lt;button *ngIf=&quot;auth.isAuthenticated&quot; (click)=&quot;toggle(a)&quot; [disabled]=&quot;toggling === a.slug&quot;&gt;&#10;          {{ isLearned(a.slug) ? 'Desmarcar' : 'Aprendido' }}&#10;        &lt;/button&gt;&#10;      &lt;/li&gt;&#10;    &lt;/ul&gt;&#10;&#10;    &lt;div class=&quot;pager&quot; *ngIf=&quot;total &gt; pageSize&quot;&gt;&#10;      &lt;button (click)=&quot;prev()&quot; [disabled]=&quot;page===1&quot;&gt;Anterior&lt;/button&gt;&#10;      &lt;span&gt;Página {{ page }} / {{ totalPages }}&lt;/span&gt;&#10;      &lt;button (click)=&quot;next()&quot; [disabled]=&quot;page===totalPages&quot;&gt;Siguiente&lt;/button&gt;&#10;    &lt;/div&gt;&#10;  `,&#10;  styles: [&#10;    `&#10;      .filters { display: flex; gap: .5rem; margin: .5rem 0; }&#10;      ul { list-style: none; padding: 0; }&#10;      li { margin: .25rem 0; }&#10;      .pager { display:flex; gap:.5rem; align-items:center; }&#10;    `,&#10;  ],&#10;})&#10;export class AlgorithmsListComponent implements OnInit {&#10;  private algos = inject(AlgorithmsService);&#10;  protected progress = inject(ProgressService);&#10;  protected auth = inject(AuthService);&#10;&#10;  items: Algorithm[] = [];&#10;  total = 0;&#10;  page = 1;&#10;  pageSize = 10;&#10;  search = '';&#10;  category = '';&#10;  loading = false;&#10;  toggling: string | null = null;&#10;  learnedSlugs = new Set&lt;string&gt;();&#10;&#10;  get totalPages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); }&#10;&#10;  ngOnInit() {&#10;    if (this.auth.isAuthenticated) {&#10;      this.progress.getLearned().subscribe((res) =&gt; (this.learnedSlugs = res.slugs));&#10;    }&#10;    this.refresh();&#10;  }&#10;&#10;  isLearned(slug: string) { return this.learnedSlugs.has(slug); }&#10;&#10;  refresh() {&#10;    this.loading = true;&#10;    this.algos.list({ search: this.search, category: this.category || undefined, page: this.page, pageSize: this.pageSize }).subscribe({&#10;      next: (res: PagedResult&lt;Algorithm&gt;) =&gt; {&#10;        this.items = res.items; this.total = res.total; this.page = res.page; this.pageSize = res.pageSize; this.loading = false;&#10;      },&#10;      error: () =&gt; { this.loading = false; },&#10;    });&#10;  }&#10;&#10;  prev() { if (this.page &gt; 1) { this.page--; this.refresh(); } }&#10;  next() { if (this.page &lt; this.totalPages) { this.page++; this.refresh(); } }&#10;&#10;  toggle(a: Algorithm) {&#10;    if (!this.auth.isAuthenticated) return;&#10;    this.toggling = a.slug;&#10;    const obs$ = this.isLearned(a.slug)&#10;      ? this.progress.unlearn(a.slug)&#10;      : this.progress.learn(a.slug).pipe(map(() =&gt; void 0));&#10;    obs$.subscribe({&#10;      next: () =&gt; {&#10;        if (this.isLearned(a.slug)) this.learnedSlugs.delete(a.slug); else this.learnedSlugs.add(a.slug);&#10;        this.toggling = null;&#10;      },&#10;      error: () =&gt; { this.toggling = null; },&#10;    });&#10;  }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bellman-ford.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bellman-ford.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Bellman-Ford&quot; subtitle=&quot;graph · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Bellman-Ford.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bellman-ford.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bellman-ford.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-bellman-ford',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './bellman-ford.component.html',&#10;})&#10;export class BellmanFordComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-search.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-search.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Binary Search&quot; subtitle=&quot;search · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Binary Search.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-search.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-search.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-binary-search',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './binary-search.component.html',&#10;})&#10;export class BinarySearchComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-tree-traversals.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/binary-tree-traversals.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-binary-tree-traversals',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './binary-tree-traversals.component.html',&#10;})&#10;export class BinaryTreeTraversalsComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/breadth-first-search.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/breadth-first-search.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Breadth-First Search (BFS)&quot; subtitle=&quot;graph · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para BFS.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/breadth-first-search.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/breadth-first-search.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-breadth-first-search',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './breadth-first-search.component.html',&#10;})&#10;export class BreadthFirstSearchComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bubble-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bubble-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Bubble Sort&quot; subtitle=&quot;sorting · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Bubble Sort. Añade visualizaciones, pasos y ejercicios adaptados.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bubble-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/bubble-sort.component.ts" />
+              <option name="originalContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-bubble-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  template: `&#10;    &lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;    &lt;ui-card title=&quot;Bubble Sort&quot; subtitle=&quot;sorting · easy&quot;&gt;&#10;      &lt;p&gt;Página personalizada para Bubble Sort. Aquí puedes añadir visualizaciones, tips y ejercicios.&lt;/p&gt;&#10;    &lt;/ui-card&gt;&#10;  `,&#10;})&#10;export class BubbleSortComponent {}&#10;&#10;" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-bubble-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './bubble-sort.component.html',&#10;})&#10;export class BubbleSortComponent {}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/depth-first-search.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/depth-first-search.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Depth-First Search (DFS)&quot; subtitle=&quot;graph · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para DFS.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/depth-first-search.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/depth-first-search.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-depth-first-search',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './depth-first-search.component.html',&#10;})&#10;export class DepthFirstSearchComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/dijkstra.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/dijkstra.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Dijkstra&quot; subtitle=&quot;graph · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Dijkstra.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/dijkstra.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/dijkstra.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-dijkstra',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './dijkstra.component.html',&#10;})&#10;export class DijkstraComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/floyd-warshall.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/floyd-warshall.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Floyd-Warshall&quot; subtitle=&quot;graph · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Floyd-Warshall.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/floyd-warshall.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/floyd-warshall.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-floyd-warshall',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './floyd-warshall.component.html',&#10;})&#10;export class FloydWarshallComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/insertion-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/insertion-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Insertion Sort&quot; subtitle=&quot;sorting · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Insertion Sort. Visualizaciones y pasos guiados.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/insertion-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/insertion-sort.component.ts" />
+              <option name="originalContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-insertion-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  template: `&#10;    &lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;    &lt;ui-card title=&quot;Insertion Sort&quot; subtitle=&quot;sorting · easy&quot;&gt;&#10;      &lt;p&gt;Página personalizada para Insertion Sort. Añade visualizaciones, pasos y ejercicios guiados.&lt;/p&gt;&#10;    &lt;/ui-card&gt;&#10;  `,&#10;})&#10;export class InsertionSortComponent {}&#10;&#10;" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-insertion-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './insertion-sort.component.html',&#10;})&#10;export class InsertionSortComponent {}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kmp.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kmp.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Knuth–Morris–Pratt (KMP)&quot; subtitle=&quot;string · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para KMP.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kmp.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kmp.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-kmp',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './kmp.component.html',&#10;})&#10;export class KmpComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/knapsack-01.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/knapsack-01.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;0/1 Knapsack&quot; subtitle=&quot;dp · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para 0/1 Knapsack.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/knapsack-01.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/knapsack-01.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-knapsack-01',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './knapsack-01.component.html',&#10;})&#10;export class Knapsack01Component {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kruskal.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kruskal.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Kruskal&quot; subtitle=&quot;graph · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Kruskal.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kruskal.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/kruskal.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-kruskal',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './kruskal.component.html',&#10;})&#10;export class KruskalComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/lis.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/lis.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Longest Increasing Subsequence (LIS)&quot; subtitle=&quot;dp · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para LIS.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/lis.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/lis.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-lis',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './lis.component.html',&#10;})&#10;export class LisComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/merge-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/merge-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Merge Sort&quot; subtitle=&quot;sorting · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Merge Sort.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/merge-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/merge-sort.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-merge-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './merge-sort.component.html',&#10;})&#10;export class MergeSortComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/prim.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/prim.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Prim&quot; subtitle=&quot;graph · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Prim.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/prim.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/prim.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-prim',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './prim.component.html',&#10;})&#10;export class PrimComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/quick-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/quick-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Quick Sort&quot; subtitle=&quot;sorting · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Quick Sort.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/quick-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/quick-sort.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-quick-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './quick-sort.component.html',&#10;})&#10;export class QuickSortComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/rabin-karp.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/rabin-karp.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Rabin-Karp&quot; subtitle=&quot;string · medium&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Rabin-Karp.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/rabin-karp.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/rabin-karp.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-rabin-karp',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './rabin-karp.component.html',&#10;})&#10;export class RabinKarpComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/selection-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/selection-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Selection Sort&quot; subtitle=&quot;sorting · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Selection Sort.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/selection-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/selection-sort.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-selection-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './selection-sort.component.html',&#10;})&#10;export class SelectionSortComponent {}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/topological-sort.component.html">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/topological-sort.component.html" />
+              <option name="updatedContent" value="&lt;a routerLink=&quot;/algorithms&quot; class=&quot;text-sm text-gray-600 hover:text-gray-900&quot;&gt;← Volver&lt;/a&gt;&#10;&lt;ui-card title=&quot;Topological Sort&quot; subtitle=&quot;graph · easy&quot;&gt;&#10;  &lt;div class=&quot;prose max-w-none&quot;&gt;&#10;    &lt;p&gt;Página personalizada para Topological Sort.&lt;/p&gt;&#10;  &lt;/div&gt;&#10;&lt;/ui-card&gt;&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/topological-sort.component.ts">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/frontend/src/app/features/algorithms/custom/topological-sort.component.ts" />
+              <option name="updatedContent" value="import { Component } from '@angular/core';&#10;import { CommonModule } from '@angular/common';&#10;import { RouterLink } from '@angular/router';&#10;import { UICardComponent } from '../../../ui/card.component';&#10;&#10;@Component({&#10;  standalone: true,&#10;  selector: 'ah-topological-sort',&#10;  imports: [CommonModule, RouterLink, UICardComponent],&#10;  templateUrl: './topological-sort.component.html',&#10;})&#10;export class TopologicalSortComponent {}&#10;" />
             </PendingDiffInfo>
           </value>
         </entry>

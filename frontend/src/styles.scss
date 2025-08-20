@@ -1,22 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos globales */
-html, body { height: 100%; }
-body { @apply bg-gray-50 text-gray-900; }
+/* Estilos globales mejorados */
+html, body { 
+  height: 100%; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
 
-a { @apply text-primary-600 hover:text-primary-700 underline-offset-4; }
+body { 
+  @apply bg-gray-50 text-gray-900 antialiased;
+  line-height: 1.6;
+}
 
-.container { @apply mx-auto max-w-6xl px-4; }
+/* Mejores enlaces */
+a { 
+  @apply text-primary-600 hover:text-primary-700 transition-colors duration-200;
+  text-decoration: none;
+}
 
-/* Utilidades personalizadas */
-.btn { @apply inline-flex items-center justify-center rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed; }
-.btn-primary { @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-600; }
-.btn-secondary { @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-300; }
-.btn-outline { @apply border border-gray-300 text-gray-900 hover:bg-gray-50; }
-.btn-ghost { @apply text-gray-700 hover:bg-gray-100; }
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 
-.btn-sm { @apply px-2.5 py-1.5 text-sm; }
-.btn-md { @apply px-4 py-2; }
-.btn-lg { @apply px-5 py-3 text-lg; }
+/* Container mejorado */
+.container { 
+  @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8; 
+}
+
+/* Tipografía mejorada */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold text-gray-900;
+  line-height: 1.2;
+}
+
+h1 { @apply text-3xl sm:text-4xl lg:text-5xl; }
+h2 { @apply text-2xl sm:text-3xl lg:text-4xl; }
+h3 { @apply text-xl sm:text-2xl lg:text-3xl; }
+h4 { @apply text-lg sm:text-xl lg:text-2xl; }
+h5 { @apply text-base sm:text-lg lg:text-xl; }
+h6 { @apply text-sm sm:text-base lg:text-lg; }
+
+p {
+  @apply text-gray-600 leading-relaxed;
+}
+
+/* Utilidades personalizadas mejoradas */
+.btn { 
+  @apply inline-flex items-center justify-center rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary { 
+  @apply bg-gradient-to-r from-primary-600 to-primary-700 text-white hover:from-primary-700 hover:to-primary-800 focus:ring-primary-500;
+}
+
+.btn-secondary { 
+  @apply bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 focus:ring-gray-300;
+}
+
+.btn-outline { 
+  @apply border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-300;
+}
+
+.btn-ghost { 
+  @apply text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-300;
+}
+
+.btn-sm { @apply px-3 py-2 text-sm; }
+.btn-md { @apply px-4 py-2.5 text-base; }
+.btn-lg { @apply px-6 py-3 text-lg; }
+
+/* Cards mejoradas */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-200;
+}
+
+.card:hover {
+  @apply shadow-lg border-gray-300;
+  transform: translateY(-2px);
+}
+
+/* Inputs mejorados */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+select, 
+textarea {
+  @apply block w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors duration-200;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Utilidades adicionales */
+.text-gradient {
+  @apply bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent;
+}
+
+.bg-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.1) 1px, transparent 0);
+  background-size: 20px 20px;
+}

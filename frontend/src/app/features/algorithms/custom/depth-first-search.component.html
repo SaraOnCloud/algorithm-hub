@@ -18,9 +18,7 @@
 
       <label class="text-sm text-gray-700">Origin</label>
       <select [(ngModel)]="sourceId" (ngModelChange)="setSource($event)" class="rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
-        @for (n of nodes; track n.id) {
-          <option [value]="n.id">{{ n.id }}</option>
-        }
+        <option *ngFor="let n of nodes" [value]="n.id">{{ n.id }}</option>
       </select>
 
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
@@ -46,29 +44,31 @@
       <svg viewBox="0 0 520 420" class="w-full max-w-full">
         <!-- Undirected edges -->
         <g>
-          @for (e of edges; track e) {
-            @let p = edgePoints(e.a, e.b);
-            <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
-                  class="transition-all duration-300"
-                  [ngClass]="{
-                    'stroke-accent': currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)),
-                    'stroke-gray-300': !(currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)))
-                  }"
-                  [attr.stroke-width]="currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)) ? 3 : 2" />
-          }
+          <ng-container *ngFor="let e of edges">
+            <ng-container *ngIf="edgePoints(e.a, e.b) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
+                    class="transition-all duration-300"
+                    [ngClass]="{
+                      'stroke-accent': currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)),
+                      'stroke-gray-300': !(currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)))
+                    }"
+                    [attr.stroke-width]="currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)) ? 3 : 2" />
+            </ng-container>
+          </ng-container>
         </g>
 
         <!-- DFS tree edges overlay -->
         <g>
-          @for (t of treeEdges(); track t) {
-            @let p = edgePoints(t.a, t.b);
-            <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2" class="stroke-primary-400" stroke-width="3" />
-          }
+          <ng-container *ngFor="let t of treeEdges()">
+            <ng-container *ngIf="edgePoints(t.a, t.b) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2" class="stroke-primary-400" stroke-width="3" />
+            </ng-container>
+          </ng-container>
         </g>
 
         <!-- Nodes -->
         <g>
-          @for (n of nodes; track n.id) {
+          <ng-container *ngFor="let n of nodes">
             <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'" class="cursor-pointer" (click)="setSource(n.id)">
               <circle r="24" class="fill-white dark:fill-gray-900 stroke-2 transition-all duration-300" [ngClass]="{
                 'stroke-accent': isCurrent(n.id),
@@ -86,14 +86,12 @@
                 <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-gray-700 dark:fill-gray-300">{{ formatDepth(depth[n.id]) }}</text>
               </g>
               <!-- In-stack badge -->
-              @if (inStack(n.id)) {
-                <g transform="translate(24, -24)">
-                  <circle r="8" class="fill-primary-600" />
-                  <text text-anchor="middle" dominant-baseline="central" class="text-[9px] fill-white">S</text>
-                </g>
-              }
+              <g *ngIf="inStack(n.id)" transform="translate(24, -24)">
+                <circle r="8" class="fill-primary-600" />
+                <text text-anchor="middle" dominant-baseline="central" class="text-[9px] fill-white">S</text>
+              </g>
             </g>
-          }
+          </ng-container>
         </g>
       </svg>
     </div>
@@ -102,13 +100,14 @@
     <div class="text-sm">
       <div class="text-gray-700 font-medium mb-1">Stack (top on the right)</div>
       <div class="flex flex-wrap items-center gap-2">
-        @if (stack.length === 0) {
+        <ng-container *ngIf="stack.length === 0; else stk">
           <div class="text-xs text-gray-500">(empty)</div>
-        } @else {
-          @for (id of stack; track $index) {
+        </ng-container>
+        <ng-template #stk>
+          <ng-container *ngFor="let id of stack; let i = index">
             <div class="rounded-full border px-2 py-1 text-xs bg-white border-gray-200">{{ id }}</div>
-          }
-        }
+          </ng-container>
+        </ng-template>
       </div>
     </div>
 
@@ -123,22 +122,20 @@
           </tr>
         </thead>
         <tbody>
-          @for (n of nodes; track n.id) {
-            <tr [ngClass]="{
-                  'bg-green-50': currentNeighbor === n.id,
-                  'bg-white': currentNeighbor !== n.id
-                }" class="transition-colors">
-              <td class="py-2 pr-4 font-medium">
-                <span class="inline-flex h-2 w-2 rounded-full mr-2" [ngClass]="{
-                  'bg-primary-600': isVisited(n.id),
-                  'bg-gray-300': !isVisited(n.id)
-                }"></span>
-                {{ n.id }}
-              </td>
-              <td class="py-2 pr-4">{{ formatDepth(depth[n.id]) }}</td>
-              <td class="py-2 pr-4">{{ prev[n.id] ?? '—' }}</td>
-            </tr>
-          }
+          <tr *ngFor="let n of nodes" [ngClass]="{
+                'bg-green-50': currentNeighbor === n.id,
+                'bg-white': currentNeighbor !== n.id
+              }" class="transition-colors">
+            <td class="py-2 pr-4 font-medium">
+              <span class="inline-flex h-2 w-2 rounded-full mr-2" [ngClass]="{
+                'bg-primary-600': isVisited(n.id),
+                'bg-gray-300': !isVisited(n.id)
+              }"></span>
+              {{ n.id }}
+            </td>
+            <td class="py-2 pr-4">{{ formatDepth(depth[n.id]) }}</td>
+            <td class="py-2 pr-4">{{ prev[n.id] ?? '—' }}</td>
+          </tr>
         </tbody>
       </table>
     </div>

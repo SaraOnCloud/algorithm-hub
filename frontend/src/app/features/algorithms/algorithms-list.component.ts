@@ -12,45 +12,152 @@ import { map } from 'rxjs/operators';
   selector: 'app-algorithms-list',
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <h2>Algoritmos</h2>
-    <div class="filters">
-      <input type="text" [(ngModel)]="search" placeholder="Buscar..." (ngModelChange)="refresh()" />
-      <select [(ngModel)]="category" (change)="refresh()">
-        <option value="">Todas las categorías</option>
-        <option value="sorting">Sorting</option>
-        <option value="search">Search</option>
-        <option value="graph">Graph</option>
-        <option value="dp">DP</option>
-        <option value="string">String</option>
-        <option value="greedy">Greedy</option>
-        <option value="tree">Tree</option>
-      </select>
-    </div>
+    <div class="space-y-8">
+      <!-- Header Section -->
+      <div class="text-center space-y-4">
+        <h1 class="text-4xl font-bold text-gray-900 bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+          🧠 Algoritmos de Programación
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Explora y aprende los algoritmos más importantes de la ciencia de la computación
+        </p>
+      </div>
 
-    <div *ngIf="loading">Cargando...</div>
+      <!-- Filters Section -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar algoritmo</label>
+            <input 
+              type="text" 
+              [(ngModel)]="search" 
+              placeholder="Buscar por nombre..." 
+              (ngModelChange)="refresh()" 
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+            />
+          </div>
+          <div class="sm:w-64">
+            <label class="block text-sm font-medium text-gray-700 mb-2">📂 Categoría</label>
+            <select 
+              [(ngModel)]="category" 
+              (change)="refresh()"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+            >
+              <option value="">Todas las categorías</option>
+              <option value="sorting">🔄 Ordenamiento</option>
+              <option value="search">🔍 Búsqueda</option>
+              <option value="graph">🕸️ Grafos</option>
+              <option value="dp">⚡ Programación Dinámica</option>
+              <option value="string">📝 Cadenas</option>
+              <option value="greedy">🎯 Algoritmos Voraces</option>
+              <option value="tree">🌳 Árboles</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-    <ul>
-      <li *ngFor="let a of items">
-        <a [routerLink]="['/algorithms', a.slug]">{{ a.name }}</a>
-        <small>({{ a.category }} · {{ a.difficulty }})</small>
-        <button *ngIf="auth.isAuthenticated" (click)="toggle(a)" [disabled]="toggling === a.slug">
-          {{ isLearned(a.slug) ? 'Desmarcar' : 'Aprendido' }}
-        </button>
-      </li>
-    </ul>
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center py-12">
+        <div class="flex items-center space-x-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+          <span class="text-lg text-gray-600">Cargando algoritmos...</span>
+        </div>
+      </div>
 
-    <div class="pager" *ngIf="total > pageSize">
-      <button (click)="prev()" [disabled]="page===1">Anterior</button>
-      <span>Página {{ page }} / {{ totalPages }}</span>
-      <button (click)="next()" [disabled]="page===totalPages">Siguiente</button>
+      <!-- Algorithms Grid -->
+      <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let a of items" class="group">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-primary-300 transition-all duration-300 overflow-hidden">
+            <!-- Card Header -->
+            <div class="p-6 pb-4">
+              <div class="flex items-start justify-between mb-3">
+                <h3 class="text-lg font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+                  {{ a.name }}
+                </h3>
+                <div *ngIf="auth.isAuthenticated && isLearned(a.slug)" class="text-green-500">
+                  ✅
+                </div>
+              </div>
+              
+              <!-- Badges -->
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span [class]="getCategoryBadgeClass(a.category)">
+                  {{ getCategoryIcon(a.category) }} {{ getCategoryName(a.category) }}
+                </span>
+                <span [class]="getDifficultyBadgeClass(a.difficulty)">
+                  {{ getDifficultyIcon(a.difficulty) }} {{ getDifficultyName(a.difficulty) }}
+                </span>
+              </div>
+
+              <!-- Description -->
+              <p *ngIf="a.description" class="text-sm text-gray-600 mb-4 line-clamp-2">
+                {{ a.description }}
+              </p>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="px-6 pb-6 flex gap-3">
+              <a 
+                [routerLink]="['/algorithms', a.slug]"
+                class="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-center py-2.5 px-4 rounded-lg font-medium transition-colors"
+              >
+                Ver Algoritmo
+              </a>
+              <button 
+                *ngIf="auth.isAuthenticated" 
+                (click)="toggle(a)" 
+                [disabled]="toggling === a.slug"
+                [class]="isLearned(a.slug) ? 
+                  'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300' : 
+                  'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'"
+                class="px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                {{ isLearned(a.slug) ? '✅' : '📚' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!loading && items.length === 0" class="text-center py-12">
+        <div class="text-6xl mb-4">🔍</div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No se encontraron algoritmos</h3>
+        <p class="text-gray-600">Intenta ajustar tus filtros de búsqueda</p>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="total > pageSize" class="flex justify-center">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-2 flex items-center gap-2">
+          <button 
+            (click)="prev()" 
+            [disabled]="page===1"
+            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            ← Anterior
+          </button>
+          <span class="px-4 py-2 text-sm text-gray-600">
+            Página {{ page }} de {{ totalPages }}
+          </span>
+          <button 
+            (click)="next()" 
+            [disabled]="page===totalPages"
+            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Siguiente →
+          </button>
+        </div>
+      </div>
     </div>
   `,
   styles: [
     `
-      .filters { display: flex; gap: .5rem; margin: .5rem 0; }
-      ul { list-style: none; padding: 0; }
-      li { margin: .25rem 0; }
-      .pager { display:flex; gap:.5rem; align-items:center; }
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
     `,
   ],
 })
@@ -106,5 +213,73 @@ export class AlgorithmsListComponent implements OnInit {
       },
       error: () => { this.toggling = null; },
     });
+  }
+
+  getCategoryBadgeClass(category: string): string {
+    const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+    switch (category) {
+      case 'sorting': return `${baseClass} bg-blue-100 text-blue-800`;
+      case 'search': return `${baseClass} bg-green-100 text-green-800`;
+      case 'graph': return `${baseClass} bg-purple-100 text-purple-800`;
+      case 'dp': return `${baseClass} bg-yellow-100 text-yellow-800`;
+      case 'string': return `${baseClass} bg-pink-100 text-pink-800`;
+      case 'greedy': return `${baseClass} bg-orange-100 text-orange-800`;
+      case 'tree': return `${baseClass} bg-emerald-100 text-emerald-800`;
+      default: return `${baseClass} bg-gray-100 text-gray-800`;
+    }
+  }
+
+  getDifficultyBadgeClass(difficulty: string): string {
+    const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
+    switch (difficulty) {
+      case 'easy': return `${baseClass} bg-green-100 text-green-800`;
+      case 'medium': return `${baseClass} bg-yellow-100 text-yellow-800`;
+      case 'hard': return `${baseClass} bg-red-100 text-red-800`;
+      default: return `${baseClass} bg-gray-100 text-gray-800`;
+    }
+  }
+
+  getCategoryIcon(category: string): string {
+    switch (category) {
+      case 'sorting': return '🔄';
+      case 'search': return '🔍';
+      case 'graph': return '🕸️';
+      case 'dp': return '⚡';
+      case 'string': return '📝';
+      case 'greedy': return '🎯';
+      case 'tree': return '🌳';
+      default: return '📊';
+    }
+  }
+
+  getCategoryName(category: string): string {
+    switch (category) {
+      case 'sorting': return 'Ordenamiento';
+      case 'search': return 'Búsqueda';
+      case 'graph': return 'Grafos';
+      case 'dp': return 'Prog. Dinámica';
+      case 'string': return 'Cadenas';
+      case 'greedy': return 'Voraces';
+      case 'tree': return 'Árboles';
+      default: return category;
+    }
+  }
+
+  getDifficultyIcon(difficulty: string): string {
+    switch (difficulty) {
+      case 'easy': return '🟢';
+      case 'medium': return '🟡';
+      case 'hard': return '🔴';
+      default: return '⚪';
+    }
+  }
+
+  getDifficultyName(difficulty: string): string {
+    switch (difficulty) {
+      case 'easy': return 'Fácil';
+      case 'medium': return 'Medio';
+      case 'hard': return 'Difícil';
+      default: return difficulty;
+    }
   }
 }

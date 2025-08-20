@@ -1,7 +1,119 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Floyd-Warshall" subtitle="graph · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Floyd-Warshall.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Floyd–Warshall" subtitle="graph · medium" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="btn btn-sm btn-primary" (click)="play()" [disabled]="running || finished">▶ Play</button>
+      <button class="btn btn-sm btn-secondary" (click)="pause()" [disabled]="!running">⏸ Pause</button>
+      <button class="btn btn-sm btn-outline" (click)="step()" [disabled]="finished">⏭ Step</button>
+      <button class="btn btn-sm btn-ghost" (click)="reset()">↻ Reset</button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <button class="btn btn-sm btn-outline" (click)="randomizeWeights()">🎲 Randomize weights</button>
+      <button class="btn btn-sm btn-outline" (click)="shuffleLayout()">🧭 Shuffle layout</button>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500': running,
+        'animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Steps {{ stepCount }} · k={{ nodeIds[kIndex] || '—' }} · i={{ nodeIds[iIndex] || '—' }} · j={{ nodeIds[jIndex] || '—' }}</span>
+    </div>
+
+    <!-- Graph canvas -->
+    <div class="relative rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+      <svg viewBox="0 0 520 420" class="w-full max-w-full">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="fill-gray-400" />
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="fill-accent" />
+          </marker>
+        </defs>
+
+        <!-- Edges (directed) -->
+        <g>
+          <ng-container *ngFor="let e of edges">
+            <ng-container *ngIf="edgePoints(e.from, e.to) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
+                    [attr.marker-end]="isCurrentEdge(e.from, e.to) ? 'url(#arrow-active)' : 'url(#arrow)'"
+                    class="transition-all duration-300"
+                    [ngClass]="isCurrentEdge(e.from, e.to) ? 'stroke-accent' : 'stroke-gray-300'"
+                    [attr.stroke-width]="isCurrentEdge(e.from, e.to) ? 3 : 2" />
+
+              <!-- Weight label -->
+              <ng-container *ngIf="edgeMid(e.from, e.to) as m">
+                <g [attr.transform]="'translate(' + m.mx + ',' + (m.my - 8) + ')'">
+                  <rect x="-16" y="-10" rx="6" ry="6" width="32" height="20" [ngClass]="isCurrentEdge(e.from, e.to) ? 'fill-accent' : 'fill-gray-800'" class="opacity-90" />
+                  <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-white font-semibold">{{ e.weight }}</text>
+                </g>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- Nodes -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'">
+              <circle r="24" class="fill-white dark:fill-gray-900 stroke-2 transition-all duration-300"
+                      [ngClass]="{
+                        'stroke-accent': isCurrentNode(n.id),
+                        'stroke-gray-300': !isCurrentNode(n.id)
+                      }" />
+              <circle r="28" class="fill-transparent" [ngClass]="{
+                'stroke-accent animate-pulse opacity-80': isCurrentNode(n.id),
+                'stroke-transparent': !isCurrentNode(n.id)
+              }" />
+              <text text-anchor="middle" dominant-baseline="central" class="font-semibold fill-gray-900 dark:fill-gray-100">{{ n.id }}</text>
+            </g>
+          </ng-container>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Distances matrix -->
+    <div class="overflow-auto rounded-xl border border-gray-200 dark:border-gray-800">
+      <table class="min-w-max text-sm">
+        <thead>
+          <tr>
+            <th class="sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 px-3 py-2">i/j</th>
+            <th *ngFor="let j of nodeIds" class="px-3 py-2 text-center text-gray-600">{{ j }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of nodeIds">
+            <th class="sticky left-0 bg-gray-50 dark:bg-gray-900 z-10 px-3 py-2 text-left">{{ i }}</th>
+            <td *ngFor="let j of nodeIds"
+                [ngClass]="{
+                  'bg-yellow-100': currentTriple.i === i && currentTriple.j === j,
+                  'bg-blue-50': currentTriple.k === i || currentTriple.k === j,
+                  'bg-green-100': lastUpdated.i === i && lastUpdated.j === j
+                }"
+                class="px-3 py-2 text-center transition-colors">
+              {{ formatDist(dist[i][j]) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <button class="btn btn-sm btn-ghost" (click)="reset()">Reset</button>
+    <button class="btn btn-sm btn-primary" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</button>
   </div>
 </ui-card>
-

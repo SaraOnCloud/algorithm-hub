@@ -1,7 +1,146 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Knuth–Morris–Pratt (KMP)" subtitle="string · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para KMP.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Knuth–Morris–Pratt (KMP)" subtitle="string · medium" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Controls -->
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Text</label>
+        <input type="text" class="block w-full rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+               [(ngModel)]="text" (ngModelChange)="onTextChange()" placeholder="Enter the text to search in" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Pattern</label>
+        <input type="text" class="block w-full rounded-md border-gray-300 bg-white text-gray-900 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+               [(ngModel)]="pattern" (ngModelChange)="onPatternChange()" placeholder="Enter the pattern to search" />
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="btn btn-sm btn-primary" (click)="play()" [disabled]="running || finished">▶ Play</button>
+      <button class="btn btn-sm btn-secondary" (click)="pause()" [disabled]="!running">⏸ Pause</button>
+      <button class="btn btn-sm btn-outline" (click)="step()" [disabled]="finished">⏭ Step</button>
+      <button class="btn btn-sm btn-ghost" (click)="resetAll()">↻ Reset</button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500': running,
+        'animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Steps {{ stepCount }} · Stage: {{ stage }}</span>
+    </div>
+
+    <!-- LPS builder visualization -->
+    <div class="rounded-lg border border-gray-200 p-3 bg-white">
+      <div class="text-sm font-medium text-gray-700 mb-2">Build LPS (Longest Prefix Suffix)</div>
+      <!-- Pattern row -->
+      <div class="flex flex-wrap gap-1 mb-2">
+        <div *ngFor="let ch of pattern.split(''); let idx = index"
+             class="w-8 h-8 rounded-md border text-center leading-8"
+             [ngClass]="{
+               'border-primary-400 bg-primary-50': isCurrentLpsPos(idx),
+               'border-gray-300': !isCurrentLpsPos(idx)
+             }">
+          {{ ch || ' ' }}
+        </div>
+      </div>
+      <!-- LPS row -->
+      <div class="flex flex-wrap gap-1">
+        <div *ngFor="let val of lps; let idx = index"
+             class="w-8 h-8 rounded-md border text-center leading-8 text-xs"
+             [ngClass]="{
+               'border-green-500 bg-green-100': isInsertLps(idx),
+               'border-gray-300': !isInsertLps(idx)
+             }">
+          {{ val }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Search visualization -->
+    <div class="rounded-lg border border-gray-200 p-3 bg-white">
+      <div class="text-sm font-medium text-gray-700 mb-2">Search</div>
+      <!-- Text row -->
+      <div class="flex flex-wrap gap-1 mb-2">
+        <div *ngFor="let ch of text.split(''); let idx = index"
+             class="w-8 h-8 rounded-md border text-center leading-8"
+             [ngClass]="{
+               'border-accent bg-cyan-50': isCompareText(idx),
+               'border-gray-300': !isCompareText(idx)
+             }">
+          {{ ch || ' ' }}
+        </div>
+      </div>
+      <!-- Pattern aligned row -->
+      <div class="flex gap-1">
+        <div *ngFor="let _ of gap(patternStart()); let s = index" class="w-8"></div>
+        <div *ngFor="let ch of pattern.split(''); let idx = index"
+             class="w-8 h-8 rounded-md border text-center leading-8"
+             [ngClass]="{
+               'border-accent bg-cyan-50': isComparePat(idx),
+               'border-green-500 bg-green-100': isMatchedPat(idx),
+               'border-gray-300': !(isComparePat(idx) || isMatchedPat(idx))
+             }">
+          {{ ch || ' ' }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Matches -->
+    <div class="text-sm">
+      <div class="text-gray-700 font-medium mb-1">Matches</div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span *ngIf="matches.length === 0" class="text-xs text-gray-500">(none yet)</span>
+        <span *ngFor="let m of matches" class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs">index {{ m }}</span>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="prose max-w-none">
+      <h3>How KMP works</h3>
+      <p>
+        KMP searches for a pattern <code>P</code> inside a text <code>T</code> in linear time by avoiding re-checking characters.
+        It first builds the <strong>LPS</strong> (Longest Prefix Suffix) array for <code>P</code>, then scans <code>T</code>, using LPS to shift the pattern efficiently on mismatches.
+      </p>
+      <h4>Pseudocode (high level)</h4>
+      <pre><code># Build LPS
+lps[0] = 0; len = 0
+for i in 1..m-1:
+  while len > 0 and P[i] != P[len]:
+    len = lps[len-1]
+  if P[i] == P[len]: len += 1
+  lps[i] = len
+
+# Search
+i = 0; j = 0
+while i < n:
+  if T[i] == P[j]: i += 1; j += 1
+  if j == m: report match at i-j; j = lps[j-1]
+  elif i < n and T[i] != P[j]:
+    if j != 0: j = lps[j-1]
+    else: i += 1
+</code></pre>
+      <h4>Complexity</h4>
+      <ul>
+        <li>Preprocessing (LPS): O(m)</li>
+        <li>Search: O(n)</li>
+        <li>Total: O(n + m), Space: O(m)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <button class="btn btn-sm btn-ghost" (click)="resetAll()">Reset</button>
+    <button class="btn btn-sm btn-primary" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</button>
   </div>
 </ui-card>
-

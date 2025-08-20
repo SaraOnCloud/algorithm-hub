@@ -1,7 +1,112 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Kruskal" subtitle="graph · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Kruskal.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Kruskal's Algorithm" subtitle="graph · medium" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <button class="btn btn-sm btn-primary" (click)="play()" [disabled]="running || finished">▶ Play</button>
+      <button class="btn btn-sm btn-secondary" (click)="pause()" [disabled]="!running">⏸ Pause</button>
+      <button class="btn btn-sm btn-outline" (click)="step()" [disabled]="finished">⏭ Step</button>
+      <button class="btn btn-sm btn-ghost" (click)="reset()">↻ Reset</button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <button class="btn btn-sm btn-outline" (click)="randomizeWeights()">🎲 Randomize weights</button>
+      <button class="btn btn-sm btn-outline" (click)="shuffleLayout()">🧭 Shuffle layout</button>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500': running,
+        'animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Steps {{ stepCount }} · MST weight {{ totalWeight }} · Edges {{ mst.length }}/{{ nodes.length - 1 }}</span>
+    </div>
+
+    <!-- Graph canvas -->
+    <div class="relative rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+      <svg viewBox="0 0 520 420" class="w-full max-w-full">
+        <!-- Edges (undirected) -->
+        <g>
+          <ng-container *ngFor="let e of edges">
+            <ng-container *ngIf="edgePoints(e.a, e.b) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
+                    class="transition-all duration-300"
+                    [ngClass]="{
+                      'stroke-primary-500': edgeStatus(e.a, e.b) === 'picked',
+                      'stroke-accent': edgeStatus(e.a, e.b) === 'current',
+                      'stroke-red-400': edgeStatus(e.a, e.b) === 'discarded',
+                      'stroke-gray-300': edgeStatus(e.a, e.b) === 'pending'
+                    }"
+                    [attr.stroke-width]="edgeStatus(e.a, e.b) === 'picked' ? 4 : edgeStatus(e.a, e.b) === 'current' ? 3 : 2"
+                    [attr.stroke-dasharray]="edgeStatus(e.a, e.b) === 'discarded' ? '6,6' : null" />
+
+              <!-- Weight label -->
+              <ng-container *ngIf="edgePoints(e.a, e.b) as q">
+                <g [attr.transform]="'translate(' + ((q.x1+q.x2)/2) + ',' + ((q.y1+q.y2)/2 - 8) + ')'">
+                  <rect x="-16" y="-10" rx="6" ry="6" width="32" height="20" class="opacity-90"
+                        [ngClass]="{
+                          'fill-primary-500': edgeStatus(e.a, e.b) === 'picked',
+                          'fill-accent': edgeStatus(e.a, e.b) === 'current',
+                          'fill-gray-800': edgeStatus(e.a, e.b) !== 'picked' && edgeStatus(e.a, e.b) !== 'current'
+                        }" />
+                  <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-white font-semibold">{{ e.weight }}</text>
+                </g>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- Nodes -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'" class="cursor-default">
+              <circle r="24" class="fill-white dark:fill-gray-900 stroke-2 stroke-gray-300" />
+              <text text-anchor="middle" dominant-baseline="central" class="font-semibold fill-gray-900 dark:fill-gray-100">{{ n.id }}</text>
+            </g>
+          </ng-container>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Sorted edges table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-600">
+            <th class="py-2 pr-4">#</th>
+            <th class="py-2 pr-4">Edge</th>
+            <th class="py-2 pr-4">Weight</th>
+            <th class="py-2 pr-4">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of sorted; let idx = index" [ngClass]="{
+            'bg-green-50': e.status === 'picked',
+            'bg-red-50': e.status === 'discarded',
+            'bg-blue-50': e.status === 'current'
+          }" class="transition-colors">
+            <td class="py-2 pr-4">{{ idx + 1 }}</td>
+            <td class="py-2 pr-4">{{ e.a }} — {{ e.b }}</td>
+            <td class="py-2 pr-4">{{ e.weight }}</td>
+            <td class="py-2 pr-4 capitalize">{{ e.status }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <button class="btn btn-sm btn-ghost" (click)="reset()">Reset</button>
+    <button class="btn btn-sm btn-primary" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</button>
   </div>
 </ui-card>
-

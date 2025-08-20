@@ -20,6 +20,7 @@ import { NgIf } from '@angular/common';
       [attr.type]="type"
       [attr.placeholder]="placeholder"
       [attr.autocomplete]="autoComplete"
+      [attr.autofocus]="autoFocus ? true : null"
       [disabled]="disabled"
       [value]="value ?? ''"
       (input)="onChange($any($event.target).value)"
@@ -34,6 +35,7 @@ export class UIInputComponent implements ControlValueAccessor {
   @Input() hint = '';
   @Input() type: 'text' | 'email' | 'password' = 'text';
   @Input() autoComplete = 'off';
+  @Input() autoFocus = false;
 
   disabled = false;
   value: any = '';

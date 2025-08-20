@@ -3,30 +3,92 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
-import { UICardComponent } from '../../ui/card.component';
-import { UIInputComponent } from '../../ui/input.component';
-import { UIButtonComponent } from '../../ui/button.component';
 
 @Component({
   standalone: true,
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, UICardComponent, UIInputComponent, UIButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <div class="min-h-[70vh] flex items-center justify-center">
-      <div class="w-full max-w-md">
-        <ui-card title="Iniciar sesión" [hasActions]="true">
+    <section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary-50/50 to-white dark:from-gray-950 dark:to-gray-900 py-10 px-4">
+      <div class="w-full max-w-5xl grid md:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-card bg-white dark:bg-gray-900">
+        <!-- Left panel / illustration -->
+        <div class="hidden md:flex flex-col justify-center gap-4 p-10 bg-gradient-to-br from-primary-600 to-primary-400 text-white">
+          <h2 class="text-3xl font-bold leading-tight">Algorithm Hub</h2>
+          <p class="text-white/90">Aprende, visualiza y practica algoritmos con experiencias interactivas.</p>
+          <ul class="space-y-2 text-white/90 text-sm">
+            @for (feat of features; track feat) {
+              <li class="flex items-center gap-2"><span class="inline-block h-1.5 w-1.5 rounded-full bg-white"></span> {{ feat }}</li>
+            }
+          </ul>
+        </div>
+
+        <!-- Right panel / form -->
+        <div class="p-6 sm:p-10">
+          <div class="mb-6 text-center md:text-left">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Iniciar sesión</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Ingresa tus credenciales para continuar</p>
+          </div>
+
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
-            <ui-input label="Email" type="email" autoComplete="email" formControlName="email" placeholder="tucorreo@dominio.com" />
-            <ui-input label="Contraseña" type="password" autoComplete="current-password" formControlName="password" placeholder="••••••••" />
-            <p *ngIf="error" class="text-sm text-red-600">{{ error }}</p>
-            <div class="card-actions flex items-center justify-between">
-              <a routerLink="/auth/register" class="text-sm text-gray-600 hover:text-gray-900">Crear cuenta</a>
-              <ui-button type="submit" [loading]="loading">Entrar</ui-button>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <input 
+                type="email" 
+                formControlName="email" 
+                placeholder="tucorreo@dominio.com"
+                autocomplete="email"
+                autofocus
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+              />
+              @if (form.get('email')?.touched && form.get('email')?.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                  @if (form.get('email')?.errors?.['required']) { <span>El email es obligatorio.</span> }
+                  @if (form.get('email')?.errors?.['email']) { <span>Introduce un email válido.</span> }
+                </p>
+              }
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+              <input 
+                type="password" 
+                formControlName="password" 
+                placeholder="••••••••"
+                autocomplete="current-password"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+              />
+              @if (form.get('password')?.touched && form.get('password')?.invalid) {
+                <p class="mt-1 text-xs text-red-600">
+                  @if (form.get('password')?.errors?.['required']) { <span>La contraseña es obligatoria.</span> }
+                  @if (form.get('password')?.errors?.['minlength']) { <span>Mínimo 8 caracteres.</span> }
+                </p>
+              }
+            </div>
+
+            @if (error) {
+              <div class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{{ error }}</div>
+            }
+
+            <div class="mt-6 flex items-center justify-between">
+              <a routerLink="/auth/register" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">Crear cuenta</a>
+              <button 
+                type="submit" 
+                [disabled]="form.invalid || loading"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                @if (loading) {
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                }
+                Entrar
+              </button>
             </div>
           </form>
-        </ui-card>
+        </div>
       </div>
-    </div>
+    </section>
   `,
 })
 export class LoginComponent {
@@ -36,6 +98,11 @@ export class LoginComponent {
 
   loading = false;
   error = '';
+  features = [
+    'Visualizaciones con animaciones',
+    'Progreso y logros guardados',
+    'Contenido curado para entrevistas',
+  ];
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -43,7 +110,7 @@ export class LoginComponent {
   });
 
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
     this.error = '';
     this.auth
@@ -51,7 +118,11 @@ export class LoginComponent {
       .subscribe({
         next: () => this.router.navigate(['/progress']),
         error: (err) => {
-          this.error = err?.error?.message || 'Error al iniciar sesión';
+          const status = err?.status;
+          if (status === 404) this.error = 'Servicio no disponible. Verifica que el backend esté corriendo en http://localhost:3000/api/v1.';
+          else if (status === 401) this.error = 'Credenciales inválidas. Verifica tu email y contraseña.';
+          else if (status === 422) this.error = 'Datos inválidos. Revisa la información ingresada.';
+          else this.error = err?.error?.message || 'Error al iniciar sesión';
           this.loading = false;
         },
       });

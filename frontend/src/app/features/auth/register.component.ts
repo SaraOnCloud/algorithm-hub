@@ -9,21 +9,103 @@ import { Router, RouterLink } from '@angular/router';
   selector: 'app-register',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <h2>Registro</h2>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <label>Nombre
-        <input type="text" formControlName="name" required />
-      </label>
-      <label>Email
-        <input type="email" formControlName="email" required />
-      </label>
-      <label>Contraseña
-        <input type="password" formControlName="password" required minlength="8" />
-      </label>
-      <button type="submit" [disabled]="form.invalid || loading">Crear cuenta</button>
-      <span *ngIf="error" style="color:red">{{ error }}</span>
-    </form>
-    <p>¿Ya tienes cuenta? <a routerLink="/auth/login">Inicia sesión</a></p>
+    <section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary-50/50 to-white dark:from-gray-950 dark:to-gray-900 py-10 px-4">
+      <div class="w-full max-w-5xl grid md:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-card bg-white dark:bg-gray-900">
+        <!-- Left panel / illustration -->
+        <div class="hidden md:flex flex-col justify-center gap-4 p-10 bg-gradient-to-br from-primary-600 to-primary-400 text-white">
+          <h2 class="text-3xl font-bold leading-tight">Únete a Algorithm Hub</h2>
+          <p class="text-white/90">Crea tu cuenta y comienza tu viaje de aprendizaje en algoritmos.</p>
+          <ul class="space-y-2 text-white/90 text-sm">
+            @for (feat of features; track feat) {
+              <li class="flex items-center gap-2"><span class="inline-block h-1.5 w-1.5 rounded-full bg-white"></span> {{ feat }}</li>
+            }
+          </ul>
+        </div>
+
+        <!-- Right panel / form -->
+        <div class="p-6 sm:p-10">
+          <div class="mb-6 text-center md:text-left">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Crear cuenta</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Completa tus datos para comenzar</p>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+             <div>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre completo</label>
+               <input 
+                 type="text" 
+                 formControlName="name" 
+                 placeholder="Tu nombre completo"
+                 autocomplete="name"
+                 autofocus
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+               />
+               @if (form.get('name')?.touched && form.get('name')?.invalid) {
+                 <p class="mt-1 text-xs text-red-600">
+                   @if (form.get('name')?.errors?.['required']) { <span>El nombre es obligatorio.</span> }
+                   @if (form.get('name')?.errors?.['minlength']) { <span>Mínimo 2 caracteres.</span> }
+                 </p>
+               }
+             </div>
+ 
+             <div>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+               <input 
+                 type="email" 
+                 formControlName="email" 
+                 placeholder="tucorreo@dominio.com"
+                 autocomplete="email"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+               />
+               @if (form.get('email')?.touched && form.get('email')?.invalid) {
+                 <p class="mt-1 text-xs text-red-600">
+                   @if (form.get('email')?.errors?.['required']) { <span>El email es obligatorio.</span> }
+                   @if (form.get('email')?.errors?.['email']) { <span>Introduce un email válido.</span> }
+                 </p>
+               }
+             </div>
+ 
+             <div>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+               <input 
+                 type="password" 
+                 formControlName="password" 
+                 placeholder="••••••••"
+                 autocomplete="new-password"
+                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+               />
+               @if (form.get('password')?.touched && form.get('password')?.invalid) {
+                 <p class="mt-1 text-xs text-red-600">
+                   @if (form.get('password')?.errors?.['required']) { <span>La contraseña es obligatoria.</span> }
+                   @if (form.get('password')?.errors?.['minlength']) { <span>Mínimo 8 caracteres.</span> }
+                 </p>
+               }
+             </div>
+ 
+             @if (error) {
+               <div class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{{ error }}</div>
+             }
+ 
+             <div class="mt-6 flex items-center justify-between">
+               <a routerLink="/auth/login" class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200">¿Ya tienes cuenta?</a>
+               <button 
+                 type="submit" 
+                 [disabled]="form.invalid || loading"
+                 class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 @if (loading) {
+                   <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                   </svg>
+                 }
+                 Crear cuenta
+               </button>
+             </div>
+           </form>
+        </div>
+      </div>
+    </section>
   `,
 })
 export class RegisterComponent {
@@ -33,6 +115,11 @@ export class RegisterComponent {
 
   loading = false;
   error = '';
+  features = [
+    'Acceso completo a visualizaciones',
+    'Seguimiento de tu progreso',
+    'Comunidad de desarrolladores',
+  ];
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
@@ -41,7 +128,7 @@ export class RegisterComponent {
   });
 
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loading = true;
     this.error = '';
     this.auth
@@ -49,7 +136,10 @@ export class RegisterComponent {
       .subscribe({
         next: () => this.router.navigate(['/progress']),
         error: (err) => {
-          this.error = err?.error?.message || 'Error al registrarse';
+          const status = err?.status;
+          if (status === 404) this.error = 'Servicio no disponible. Verifica que el backend esté corriendo en http://localhost:3000/api/v1.';
+          else if (status === 409) this.error = 'Este email ya está registrado.';
+          else this.error = err?.error?.message || 'Error al crear la cuenta';
           this.loading = false;
         },
       });

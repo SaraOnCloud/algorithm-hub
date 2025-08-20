@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 
 export interface User {
   id: number;
@@ -58,4 +58,3 @@ export class AuthService {
       .pipe(tap((resp) => this.setSession(resp)));
   }
 }
-

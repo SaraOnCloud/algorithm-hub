@@ -7,7 +7,6 @@ import { UICardComponent } from '../../../ui/card.component';
   standalone: true,
   selector: 'ah-activity-selection',
   imports: [CommonModule, RouterLink, UICardComponent],
-  templateUrl: './binary-tree-traversals.component.html',
+  templateUrl: './activity-selection.component.html',
 })
 export class ActivitySelectionComponent {}
-

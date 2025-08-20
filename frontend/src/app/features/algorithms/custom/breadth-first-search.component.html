@@ -1,7 +1,143 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Breadth-First Search (BFS)" subtitle="graph · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para BFS.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Breadth-First Search (BFS)" subtitle="graph · easy" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Play</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pause</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Step</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="reset()">↻ Reset</ui-button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Origin</label>
+      <select [(ngModel)]="sourceId" (ngModelChange)="setSource($event)" class="rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+        <option *ngFor="let n of nodes" [value]="n.id">{{ n.id }}</option>
+      </select>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <ui-button size="sm" variant="outline" (click)="randomizeEdges()">🎲 Randomize edges</ui-button>
+      <ui-button size="sm" variant="outline" (click)="shuffleLayout()">🧭 Shuffle layout</ui-button>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500 animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Steps {{ stepCount }} · Phase: {{ phase }} · Queue: {{ queue.length }}</span>
+    </div>
+
+    <!-- Graph canvas -->
+    <div class="relative rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+      <svg viewBox="0 0 520 420" class="w-full max-w-full">
+        <!-- Undirected edges -->
+        <g>
+          <ng-container *ngFor="let e of edges">
+            <ng-container *ngIf="edgePoints(e.a, e.b) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
+                    class="transition-all duration-300"
+                    [ngClass]="{
+                      'stroke-accent': currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)),
+                      'stroke-gray-300': !(currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)))
+                    }"
+                    [attr.stroke-width]="currentEdge && ((currentEdge.u===e.a && currentEdge.v===e.b) || (currentEdge.u===e.b && currentEdge.v===e.a)) ? 3 : 2" />
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- BFS tree edges overlay -->
+        <g>
+          <ng-container *ngFor="let t of treeEdges()">
+            <ng-container *ngIf="edgePoints(t.a, t.b) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2" class="stroke-primary-400" stroke-width="3" />
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- Nodes -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'" class="cursor-pointer" (click)="setSource(n.id)">
+              <circle r="24" class="fill-white dark:fill-gray-900 stroke-2 transition-all duration-300" [ngClass]="{
+                'stroke-accent': isCurrent(n.id),
+                'stroke-primary-400': !isCurrent(n.id) && isVisited(n.id),
+                'stroke-gray-300': !isVisited(n.id)
+              }" />
+              <circle r="28" class="fill-transparent" [ngClass]="{
+                'stroke-accent animate-pulse opacity-80': isCurrent(n.id),
+                'stroke-transparent': !isCurrent(n.id)
+              }" />
+              <text text-anchor="middle" dominant-baseline="central" class="font-semibold fill-gray-900 dark:fill-gray-100">{{ n.id }}</text>
+              <!-- Distance badge -->
+              <g transform="translate(0, 34)">
+                <rect x="-22" y="-10" rx="6" ry="6" width="44" height="20" class="fill-gray-100 dark:fill-gray-800" />
+                <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-gray-700 dark:fill-gray-300">{{ formatDist(dist[n.id]) }}</text>
+              </g>
+              <!-- In-queue badge -->
+              <g *ngIf="inQueue(n.id)" transform="translate(24, -24)">
+                <circle r="8" class="fill-primary-600" />
+                <text text-anchor="middle" dominant-baseline="central" class="text-[9px] fill-white">Q</text>
+              </g>
+            </g>
+          </ng-container>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Queue panel -->
+    <div class="text-sm">
+      <div class="text-gray-700 font-medium mb-1">Queue</div>
+      <div class="flex flex-wrap items-center gap-2">
+        <div *ngFor="let id of queue; let i = index" class="rounded-full border px-2 py-1 text-xs bg-white border-gray-200">
+          {{ id }}
+        </div>
+        <div *ngIf="queue.length === 0" class="text-xs text-gray-500">(empty)</div>
+      </div>
+    </div>
+
+    <!-- Distances table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-600">
+            <th class="py-2 pr-4">Node</th>
+            <th class="py-2 pr-4">Level</th>
+            <th class="py-2 pr-4">Prev</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of nodes" [ngClass]="{
+              'bg-green-50': currentNeighbor === n.id,
+              'bg-white': currentNeighbor !== n.id
+            }" class="transition-colors">
+            <td class="py-2 pr-4 font-medium">
+              <span class="inline-flex h-2 w-2 rounded-full mr-2" [ngClass]="{
+                'bg-primary-600': isVisited(n.id),
+                'bg-gray-300': !isVisited(n.id)
+              }"></span>
+              {{ n.id }}
+            </td>
+            <td class="py-2 pr-4">{{ formatDist(dist[n.id]) }}</td>
+            <td class="py-2 pr-4">{{ prev[n.id] ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <ui-button variant="ghost" size="sm" (click)="reset()">Reset</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</ui-button>
   </div>
 </ui-card>
-

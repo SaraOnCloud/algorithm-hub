@@ -1,7 +1,78 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Bubble Sort" subtitle="sorting · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Bubble Sort. Añade visualizaciones, pasos y ejercicios adaptados.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Bubble Sort" subtitle="sorting · easy" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Play</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pause</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Step</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="resetAlgoState()">↻ Reset</ui-button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Size</label>
+      <input type="number" class="w-20 rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+             [ngModel]="size" (ngModelChange)="setSize($event)" min="3" max="40" />
+      <ui-button size="sm" variant="outline" (click)="randomizeArray()">🎲 Randomize array</ui-button>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500 animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Steps {{ stepCount }} · Comparisons {{ comparisons }} · Swaps {{ swaps }} · Pass {{ i }}/{{ n - 1 }}</span>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-white border border-gray-300"></span> Idle</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-accent"></span> Comparing</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-red-300 border border-red-400"></span> Swapping</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-green-200 border border-green-400"></span> Sorted tail</span>
+    </div>
+
+    <!-- Bars visualization -->
+    <div class="overflow-x-auto">
+      <div class="min-w-max">
+        <div class="flex items-end gap-1 h-64 p-2 border rounded-md bg-white">
+          <div *ngFor="let v of arr; let idx = index" class="relative flex-1 min-w-[18px] rounded-t-md transition-all duration-300"
+               [ngClass]="{
+                 'bg-accent': isCurrentIndex(idx) && !isSwappingIndex(idx),
+                 'bg-red-300': isSwappingIndex(idx),
+                 'bg-green-200': isSortedIndex(idx) && !isCurrentIndex(idx) && !isSwappingIndex(idx),
+                 'bg-gray-200': !isCurrentIndex(idx) && !isSwappingIndex(idx) && !isSortedIndex(idx)
+               }"
+               [style.height]="barHeight(v)">
+            <!-- Value label -->
+            <div class="absolute -top-6 inset-x-0 text-center text-[10px] text-gray-700">{{ v }}</div>
+            <!-- Index label -->
+            <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-gray-500">{{ idx }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="prose max-w-none text-sm text-gray-600">
+      <p>
+        Bubble Sort repeatedly steps through the array, compares adjacent items and swaps them if they are in the wrong order.
+        Each pass bubbles the largest remaining element to the tail; if a full pass makes no swaps, the array is already sorted.
+      </p>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <ui-button variant="ghost" size="sm" (click)="resetAlgoState()">Reset</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</ui-button>
   </div>
 </ui-card>
-

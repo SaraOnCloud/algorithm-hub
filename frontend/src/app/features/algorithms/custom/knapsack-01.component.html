@@ -94,7 +94,7 @@
             <tr *ngFor="let r of [].constructor(items.length + 1); let ri = index">
               <th class="sticky left-0 bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur z-10 text-left">
                 <span *ngIf="ri === 0" class="text-slate-400">0</span>
-                <span *ngIf="ri > 0">{{ items[ri - 1]?.name }} <span class="text-xs text-slate-400">(p={{ items[ri-1]?.weight }}, v={{ items[ri-1]?.value }})</span></span>
+                <span *ngIf="ri > 0">{{ items[ri - 1].name }} <span class="text-xs text-slate-400">(p={{ items[ri-1].weight }}, v={{ items[ri-1].value }})</span></span>
               </th>
               <td *ngFor="let c of [].constructor(capacity + 1); let ci = index"
                   [class.cell-current]="ri === i && ci === w && !finished"
@@ -121,8 +121,8 @@
         <div *ngIf="i>0" class="flex items-center gap-2">
           <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
             <span class="text-slate-500">ítem</span>
-            <span class="font-semibold" [style.color]="items[i-1]?.color">{{ items[i-1]?.name }}</span>
-            <span class="text-slate-500">p={{ items[i-1]?.weight }}, v={{ items[i-1]?.value }}</span>
+            <span class="font-semibold" [style.color]="items[i-1].color">{{ items[i-1].name }}</span>
+            <span class="text-slate-500">p={{ items[i-1].weight }}, v={{ items[i-1].value }}</span>
           </span>
           <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight <= w" class="text-emerald-600">incluible</span>
           <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight > w" class="text-rose-600">no cabe</span>

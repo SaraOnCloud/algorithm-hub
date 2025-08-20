@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UICardComponent } from '../../../ui/card.component';
@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './knapsack-01.component.html',
   styleUrls: ['./knapsack-01.component.scss']
 })
-export class Knapsack01Component {
+export class Knapsack01Component implements OnInit {
   items: Array<{ id: number; name: string; weight: number; value: number; color: string }> = [];
   capacity = 10;
   maxCapacity = 20;

@@ -1,7 +1,119 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Binary Search" subtitle="search · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Binary Tree Traversals.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
+<ui-card title="Binary Tree Traversals" subtitle="tree · easy" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar -->
+    <div class="flex flex-wrap items-center gap-2">
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Play</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pause</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Step</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="resetTraversal()">↻ Reset</ui-button>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Speed</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Traversal</label>
+      <select [(ngModel)]="traversal" (ngModelChange)="onTraversalChange()" class="rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+        <option>Preorder</option>
+        <option>Inorder</option>
+        <option>Postorder</option>
+        <option>Level-order</option>
+      </select>
+
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+
+      <label class="text-sm text-gray-700">Size</label>
+      <input type="number" class="w-20 rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+             [ngModel]="targetNodes" (ngModelChange)="setTargetNodes($event)" min="3" max="31" />
+      <ui-button size="sm" variant="outline" (click)="rebuildTree()">🎲 Randomize tree</ui-button>
+      <ui-button size="sm" variant="outline" (click)="randomizeValuesOnly()">🔁 Shuffle values</ui-button>
+    </div>
+
+    <!-- Status -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500 animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Visited {{ visited.size }}/{{ order.length }}</span>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border border-gray-300 bg-white"></span> Unvisited</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-primary-50 border border-primary-200"></span> Visited</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border-2 border-accent"></span> Current</span>
+    </div>
+
+    <!-- Tree canvas -->
+    <div class="relative rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+      <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" class="w-full max-w-full">
+        <defs>
+          <marker id="arrow-tree" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="fill-gray-300" />
+          </marker>
+        </defs>
+
+        <!-- Edges -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <ng-container *ngIf="nodeById(n.left) as L">
+              <line [attr.x1]="n.x" [attr.y1]="n.y" [attr.x2]="L.x" [attr.y2]="L.y"
+                    class="stroke-gray-300" stroke-width="2" marker-end="url(#arrow-tree)" />
+            </ng-container>
+            <ng-container *ngIf="nodeById(n.right) as R">
+              <line [attr.x1]="n.x" [attr.y1]="n.y" [attr.x2]="R.x" [attr.y2]="R.y"
+                    class="stroke-gray-300" stroke-width="2" marker-end="url(#arrow-tree)" />
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- Nodes -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'" class="transition-transform duration-300">
+              <circle r="20" class="fill-white dark:fill-gray-900 stroke-2"
+                      [ngClass]="{
+                        'stroke-accent': isCurrent(n.id),
+                        'stroke-primary-300': !isCurrent(n.id) && isVisited(n.id),
+                        'stroke-gray-300': !isVisited(n.id)
+                      }" />
+              <circle r="24" class="fill-transparent" [ngClass]="{
+                'stroke-accent animate-pulse opacity-80': isCurrent(n.id),
+                'stroke-transparent': !isCurrent(n.id)
+              }"></circle>
+              <text text-anchor="middle" dominant-baseline="central" class="font-semibold fill-gray-900 dark:fill-gray-100">{{ n.label }}</text>
+            </g>
+          </ng-container>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Traversal order -->
+    <div class="text-sm">
+      <div class="text-gray-700 font-medium mb-1">Traversal sequence</div>
+      <div class="flex flex-wrap gap-2">
+        <ng-container *ngFor="let id of order; let i = index">
+          <div class="rounded-full px-2 py-1 border text-xs"
+               [ngClass]="{
+                 'bg-primary-50 border-primary-200': isVisited(id),
+                 'bg-white border-gray-200': !isVisited(id)
+               }">
+            {{ i + 1 }}. {{ nodeById(id)?.label }}
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <ui-button variant="ghost" size="sm" (click)="resetTraversal()">Reset</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</ui-button>
   </div>
 </ui-card>
-

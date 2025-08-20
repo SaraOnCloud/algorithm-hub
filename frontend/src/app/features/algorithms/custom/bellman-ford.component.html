@@ -1,7 +1,137 @@
 <a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Bellman-Ford" subtitle="graph · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Bellman-Ford.</p>
+<ui-card title="Bellman-Ford" subtitle="graph · medium" [hasActions]="true">
+  <div class="flex flex-col gap-4">
+    <!-- Toolbar principal -->
+    <div class="flex flex-wrap items-center gap-2">
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Reproducir</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pausa</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Paso</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="reset()">↻ Reiniciar</ui-button>
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+      <label class="text-sm text-gray-700">Velocidad</label>
+      <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
+      <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+      <label class="text-sm text-gray-700">Origen</label>
+      <select [(ngModel)]="sourceId" (ngModelChange)="setSource($event)" class="rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
+        <option *ngFor="let n of nodes" [value]="n.id">{{ n.id }}</option>
+      </select>
+      <span class="mx-2 h-5 w-px bg-gray-300"></span>
+      <ui-button size="sm" variant="outline" (click)="randomizeWeights()">🎲 Aleatorizar pesos</ui-button>
+    </div>
+
+    <!-- Mensaje de estado -->
+    <div class="text-sm text-gray-700 flex items-center gap-2">
+      <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
+        'bg-green-500 animate-pulse': running,
+        'bg-gray-400': !running && !finished,
+        'bg-purple-500': finished && !negativeCycle,
+        'bg-red-500': negativeCycle
+      }"></span>
+      <span class="font-medium">{{ lastMessage }}</span>
+      <span class="ml-auto text-xs text-gray-500">Iteración {{ iter }}/{{ totalIterations }} · Arista {{ edgeIndex + 1 }}/{{ edges.length }} · Fase: {{ phase }}</span>
+    </div>
+
+    <!-- Lienzo del grafo -->
+    <div class="relative rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-800 dark:bg-gray-900">
+      <svg viewBox="0 0 520 420" class="w-full max-w-full">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="fill-gray-400" />
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" class="fill-accent" />
+          </marker>
+        </defs>
+
+        <!-- Aristas -->
+        <g>
+          <ng-container *ngFor="let e of edges; let i = index">
+            <ng-container *ngIf="edgePoints(e) as p">
+              <line [attr.x1]="p.x1" [attr.y1]="p.y1" [attr.x2]="p.x2" [attr.y2]="p.y2"
+                    [attr.marker-end]="isCurrent(e) ? 'url(#arrow-active)' : 'url(#arrow)'"
+                    [ngClass]="isCurrent(e) ? 'stroke-accent' : 'stroke-gray-300'"
+                    class="transition-all duration-300"
+                    [attr.stroke-width]="isCurrent(e) ? 3 : 2" />
+
+              <!-- Etiqueta de peso -->
+              <ng-container *ngIf="edgeMid(e) as m">
+                <g [attr.transform]="'translate(' + m.mx + ',' + (m.my - 8) + ')'">
+                  <rect x="-16" y="-10" rx="6" ry="6" width="32" height="20" [ngClass]="isCurrent(e) ? 'fill-accent' : 'fill-gray-800'" class="opacity-90" />
+                  <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-white font-semibold">{{ e.weight }}</text>
+                </g>
+              </ng-container>
+            </ng-container>
+          </ng-container>
+        </g>
+
+        <!-- Nodos -->
+        <g>
+          <ng-container *ngFor="let n of nodes">
+            <g [attr.transform]="'translate(' + n.x + ',' + n.y + ')'" class="cursor-pointer"
+               (click)="setSource(n.id)">
+              <circle r="24" class="fill-white dark:fill-gray-900 stroke-2 transition-all duration-300"
+                      [ngClass]="{
+                        'stroke-primary-600': isSource(n),
+                        'stroke-gray-300': !isSource(n)
+                      }" />
+              <circle r="28" class="fill-transparent" [ngClass]="{
+                'stroke-primary-200 animate-pulse opacity-80': isSource(n),
+                'stroke-transparent': !isSource(n)
+              }" />
+              <circle r="26" class="fill-transparent transition-all duration-300" [ngClass]="{
+                'stroke-green-400 opacity-70': lastUpdateNode === n.id,
+                'stroke-transparent': lastUpdateNode !== n.id
+              }" />
+              <text text-anchor="middle" dominant-baseline="central" class="font-semibold fill-gray-900 dark:fill-gray-100">{{ n.id }}</text>
+              <!-- Distancia -->
+              <g transform="translate(0, 34)">
+                <rect x="-22" y="-10" rx="6" ry="6" width="44" height="20" class="fill-gray-100 dark:fill-gray-800" />
+                <text text-anchor="middle" dominant-baseline="central" class="text-[10px] fill-gray-700 dark:fill-gray-300">{{ formatDist(dist[n.id]) }}</text>
+              </g>
+            </g>
+          </ng-container>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Tabla de distancias -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="text-left text-gray-600">
+            <th class="py-2 pr-4">Nodo</th>
+            <th class="py-2 pr-4">Distancia</th>
+            <th class="py-2 pr-4">Previo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of nodes" [ngClass]="{
+            'bg-green-50': lastUpdateNode === n.id,
+            'bg-white': lastUpdateNode !== n.id
+          }" class="transition-colors">
+            <td class="py-2 pr-4 font-medium">
+              <span class="inline-flex h-2 w-2 rounded-full mr-2" [ngClass]="isSource(n) ? 'bg-primary-600' : 'bg-gray-300'"></span>
+              {{ n.id }}
+            </td>
+            <td class="py-2 pr-4">{{ formatDist(dist[n.id]) }}</td>
+            <td class="py-2 pr-4">{{ prev[n.id] ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Alertas -->
+    <div *ngIf="negativeCycle" class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+      Se detectó un ciclo negativo alcanzable desde el origen.
+    </div>
+    <div *ngIf="finished && !negativeCycle" class="rounded-md border border-purple-200 bg-purple-50 p-3 text-sm text-purple-800">
+      Algoritmo completado correctamente. Puedes reiniciar o cambiar el origen.
+    </div>
+  </div>
+
+  <div class="card-actions flex items-center justify-end gap-2">
+    <ui-button variant="ghost" size="sm" (click)="reset()">Reiniciar</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()" [loading]="false">{{ running ? 'Pausar' : 'Reproducir' }}</ui-button>
   </div>
 </ui-card>
-

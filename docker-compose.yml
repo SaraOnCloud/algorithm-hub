@@ -17,7 +17,7 @@ services:
       - internal
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:5
+    image: phpmyadmin:5.2.1  # multi-arch
     restart: unless-stopped
     environment:
       PMA_HOST: db
@@ -28,6 +28,20 @@ services:
     ports:
       - "8087:80"
     networks:
+      - internal
+
+  middlewares:
+    image: alpine:3.19
+    command: ["sleep","infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.secHeaders.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.secHeaders.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.secHeaders.headers.stsPreload=true"
+      - "traefik.http.middlewares.secHeaders.headers.referrerPolicy=no-referrer"
+      - "traefik.http.middlewares.secHeaders.headers.contentTypeNosniff=true"
+    networks:
+      - traefik
       - internal
 
   backend:
@@ -52,6 +66,7 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.middlewares=secHeaders@docker"
       - "traefik.docker.network=traefik"
 
   frontend:
@@ -69,6 +84,7 @@ services:
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.middlewares=secHeaders@docker"
       - "traefik.docker.network=traefik"
 
   traefik:
@@ -102,12 +118,6 @@ services:
       retries: 5
     labels:
       - "traefik.enable=true"
-      - "traefik.http.middlewares.secHeaders.headers.customResponseHeaders.X-Test=ok"
-      - "traefik.http.middlewares.secHeaders.headers.stsSeconds=63072000"
-      - "traefik.http.middlewares.secHeaders.headers.stsIncludeSubdomains=true"
-      - "traefik.http.middlewares.secHeaders.headers.stsPreload=true"
-      - "traefik.http.middlewares.secHeaders.headers.referrerPolicy=no-referrer"
-      - "traefik.http.middlewares.secHeaders.headers.contentTypeNosniff=true"
 
 networks:
   traefik:

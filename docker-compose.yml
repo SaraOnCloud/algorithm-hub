@@ -40,13 +40,24 @@ services:
       DB_USER: algouser
       DB_PASSWORD: algopass
       DB_NAME: algorithm_hub
+      NODE_ENV: production
     depends_on:
       db:
         condition: service_healthy
     networks:
       - internal
+      - traefik
     expose:
       - "3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      # Opcional security headers middleware (definido en traefik)
+      - "traefik.http.routers.backend.middlewares=secHeaders@docker"
+      - "traefik.docker.network=traefik"
 
   frontend:
     build: ./frontend
@@ -56,12 +67,59 @@ services:
       - backend
     networks:
       - internal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.middlewares=secHeaders@docker"
+      - "traefik.docker.network=traefik"
+    expose:
+      - "80"
+
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # Para pruebas sin rate limit descomentar línea siguiente y comentar redirección a producción cuando toque
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--accesslog=true"
+      - "--log.level=INFO"
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - traefik
+      - internal
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.secHeaders.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.secHeaders.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.secHeaders.headers.stsPreload=true"
+      - "traefik.http.middlewares.secHeaders.headers.referrerPolicy=no-referrer"
+      - "traefik.http.middlewares.secHeaders.headers.contentTypeNosniff=true"
 
 networks:
+  traefik:
+    name: traefik
+    driver: bridge
   internal:
     driver: bridge
 
 volumes:
   db_data:
+  traefik_letsencrypt:

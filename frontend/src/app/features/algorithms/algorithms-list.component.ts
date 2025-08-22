@@ -16,10 +16,10 @@ import { map } from 'rxjs/operators';
       <!-- Header Section -->
       <div class="text-center space-y-4">
         <h1 class="text-4xl font-bold text-gray-900 bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-          🧠 Algoritmos de Programación
+          🧠 Programming Algorithms
         </h1>
         <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          Explora y aprende los algoritmos más importantes de la ciencia de la computación
+          Explore and learn the most important algorithms in computer science
         </p>
       </div>
 
@@ -27,30 +27,30 @@ import { map } from 'rxjs/operators';
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Buscar algoritmo</label>
-            <input 
-              type="text" 
-              [(ngModel)]="search" 
-              placeholder="Buscar por nombre..." 
-              (ngModelChange)="refresh()" 
+            <label class="block text-sm font-medium text-gray-700 mb-2">🔍 Search algorithm</label>
+            <input
+              type="text"
+              [(ngModel)]="search"
+              placeholder="Search by name..."
+              (ngModelChange)="refresh()"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             />
           </div>
           <div class="sm:w-64">
-            <label class="block text-sm font-medium text-gray-700 mb-2">📂 Categoría</label>
-            <select 
-              [(ngModel)]="category" 
+            <label class="block text-sm font-medium text-gray-700 mb-2">📂 Category</label>
+            <select
+              [(ngModel)]="category"
               (change)="refresh()"
               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
             >
-              <option value="">Todas las categorías</option>
-              <option value="sorting">🔄 Ordenamiento</option>
-              <option value="search">🔍 Búsqueda</option>
-              <option value="graph">🕸️ Grafos</option>
-              <option value="dp">⚡ Programación Dinámica</option>
-              <option value="string">📝 Cadenas</option>
-              <option value="greedy">🎯 Algoritmos Voraces</option>
-              <option value="tree">🌳 Árboles</option>
+              <option value="">All categories</option>
+              <option value="sorting">🔄 Sorting</option>
+              <option value="search">🔍 Search</option>
+              <option value="graph">🕸️ Graph</option>
+              <option value="dp">⚡ Dynamic Programming</option>
+              <option value="string">📝 String</option>
+              <option value="greedy">🎯 Greedy</option>
+              <option value="tree">🌳 Trees</option>
             </select>
           </div>
         </div>
@@ -60,7 +60,7 @@ import { map } from 'rxjs/operators';
       <div *ngIf="loading" class="flex justify-center py-12">
         <div class="flex items-center space-x-3">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <span class="text-lg text-gray-600">Cargando algoritmos...</span>
+          <span class="text-lg text-gray-600">Loading algorithms...</span>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ import { map } from 'rxjs/operators';
                   ✅
                 </div>
               </div>
-              
+
               <!-- Badges -->
               <div class="flex flex-wrap gap-2 mb-4">
                 <span [class]="getCategoryBadgeClass(a.category)">
@@ -97,18 +97,18 @@ import { map } from 'rxjs/operators';
 
             <!-- Card Actions -->
             <div class="px-6 pb-6 flex gap-3">
-              <a 
+              <a
                 [routerLink]="['/algorithms', a.slug]"
                 class="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-center py-2.5 px-4 rounded-lg font-medium transition-colors"
               >
-                Ver Algoritmo
+                View Algorithm
               </a>
-              <button 
-                *ngIf="auth.isAuthenticated" 
-                (click)="toggle(a)" 
+              <button
+                *ngIf="auth.isAuthenticated"
+                (click)="toggle(a)"
                 [disabled]="toggling === a.slug"
-                [class]="isLearned(a.slug) ? 
-                  'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300' : 
+                [class]="isLearned(a.slug) ?
+                  'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300' :
                   'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'"
                 class="px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
               >
@@ -122,29 +122,29 @@ import { map } from 'rxjs/operators';
       <!-- Empty State -->
       <div *ngIf="!loading && items.length === 0" class="text-center py-12">
         <div class="text-6xl mb-4">🔍</div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">No se encontraron algoritmos</h3>
-        <p class="text-gray-600">Intenta ajustar tus filtros de búsqueda</p>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">No algorithms found</h3>
+        <p class="text-gray-600">Try adjusting your filters</p>
       </div>
 
       <!-- Pagination -->
       <div *ngIf="total > pageSize" class="flex justify-center">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-2 flex items-center gap-2">
-          <button 
-            (click)="prev()" 
+          <button
+            (click)="prev()"
             [disabled]="page===1"
             class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            ← Anterior
+            ← Previous
           </button>
           <span class="px-4 py-2 text-sm text-gray-600">
-            Página {{ page }} de {{ totalPages }}
+            Page {{ page }} of {{ totalPages }}
           </span>
-          <button 
-            (click)="next()" 
+          <button
+            (click)="next()"
             [disabled]="page===totalPages"
             class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Siguiente →
+            Next →
           </button>
         </div>
       </div>
@@ -254,13 +254,13 @@ export class AlgorithmsListComponent implements OnInit {
 
   getCategoryName(category: string): string {
     switch (category) {
-      case 'sorting': return 'Ordenamiento';
-      case 'search': return 'Búsqueda';
-      case 'graph': return 'Grafos';
-      case 'dp': return 'Prog. Dinámica';
-      case 'string': return 'Cadenas';
-      case 'greedy': return 'Voraces';
-      case 'tree': return 'Árboles';
+      case 'sorting': return 'Sorting';
+      case 'search': return 'Search';
+      case 'graph': return 'Graph';
+      case 'dp': return 'Dynamic Prog.';
+      case 'string': return 'String';
+      case 'greedy': return 'Greedy';
+      case 'tree': return 'Tree';
       default: return category;
     }
   }
@@ -276,9 +276,9 @@ export class AlgorithmsListComponent implements OnInit {
 
   getDifficultyName(difficulty: string): string {
     switch (difficulty) {
-      case 'easy': return 'Fácil';
-      case 'medium': return 'Medio';
-      case 'hard': return 'Difícil';
+      case 'easy': return 'Easy';
+      case 'medium': return 'Medium';
+      case 'hard': return 'Hard';
       default: return difficulty;
     }
   }

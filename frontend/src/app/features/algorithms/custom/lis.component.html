@@ -1,7 +1,165 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Longest Increasing Subsequence (LIS)" subtitle="dp · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para LIS.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Longest Increasing Subsequence (LIS)" subtitle="dynamic programming · greedy · O(n^2) / O(n log n)">
+  <div class="flex flex-col gap-6">
+    <!-- Intro / Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p>The <strong>Longest Increasing Subsequence</strong> (LIS) problem asks for the longest subsequence of numbers (not necessarily contiguous) that is strictly increasing.</p>
+      <p>This interactive playground lets you explore two standard approaches:</p>
+      <ul>
+        <li><strong>O(n²) Dynamic Programming:</strong> For each position <code>i</code>, compute <code>dp[i]</code> = length of LIS ending at <code>i</code> by scanning all <code>j &lt; i</code>.</li>
+        <li><strong>O(n log n) Patience (Greedy + Binary Search):</strong> Maintain pile tops (minimal tail for each subsequence length). Uses a binary search to place each element, mirroring the card game patience.</li>
+      </ul>
+      <p><em>Hit Play and watch the algorithm build the solution step-by-step. Switch modes anytime (resets progress).</em></p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-3 items-end">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Mode</span>
+        <div class="flex gap-1">
+          <button type="button" (click)="switchMode('dp')" [class]="'px-3 py-1.5 rounded-md text-xs font-semibold border transition ' + (mode==='dp' ? 'bg-indigo-600 text-white border-indigo-600 shadow' : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800')">DP O(n²)</button>
+          <button type="button" (click)="switchMode('patience')" [class]="'px-3 py-1.5 rounded-md text-xs font-semibold border transition ' + (mode==='patience' ? 'bg-indigo-600 text-white border-indigo-600 shadow' : 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800')">Patience O(n log n)</button>
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 dark:text-gray-300">Size: {{ size }}</label>
+        <input type="range" min="4" max="40" [(ngModel)]="size" (change)="setSize(size)" class="w-40 accent-indigo-600" />
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text-xs font-medium text-gray-600 dark:text-gray-300">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40 accent-indigo-600" />
+      </div>
+
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="randomizeArray()" [disabled]="running">Randomize</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetState()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="reconstructNow()">Reconstruct Now</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs" *ngIf="finished">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Sequence Visualization -->
+    <div class="space-y-4">
+      <h3 class="font-semibold text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400">Input Sequence</h3>
+      <div class="relative overflow-x-auto">
+        <div class="flex gap-2 items-end min-h-[220px] pb-3">
+          @for (v of arr; track $index) {
+            <div class="flex flex-col items-center gap-1 w-10">
+              <div [ngClass]="elementClasses($index)" [ngStyle]="{height: computedHeight($index)}">
+                <span class="absolute top-1 left-1 text-[10px] opacity-60">{{$index}}</span>
+                <span class="mb-1 select-none">{{ v }}</span>
+              </div>
+              @if (mode === 'dp') {
+                <div class="flex flex-col items-center gap-0.5 w-full">
+                  <div class="w-full text-center text-[10px] font-mono rounded bg-gray-100 dark:bg-gray-800 px-1 py-0.5" [class.bg-indigo-600]="isCurrentOuter($index)" [class.text-white]="isCurrentOuter($index)">dp={{ dp[$index] }}</div>
+                  <div class="w-full text-center text-[10px] text-gray-500 dark:text-gray-400">prev={{ prev[$index] }}</div>
+                </div>
+              }
+              @if (mode === 'patience') {
+                <div class="w-full text-center text-[10px] font-mono text-gray-500 dark:text-gray-400">pile={{ pileIdxForElement[$index] >= 0 ? pileIdxForElement[$index] : '-' }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Patience piles visualization -->
+    @if (mode === 'patience') {
+      <div class="space-y-3">
+        <h3 class="font-semibold text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400">Piles (left → right = increasing length)</h3>
+        <div class="flex gap-4 overflow-x-auto pb-2">
+          @for (pile of piles; track pile; let pIndex = $index) {
+            <div [ngClass]="pileClass(pIndex)" class="min-w-[120px]">
+              <div class="text-[10px] uppercase font-semibold tracking-wide text-gray-500 dark:text-gray-400">Pile {{pIndex}}</div>
+              <div class="flex flex-col-reverse gap-1">
+                @for (val of pile; track val; let innerIndex = $index) {
+                  <div class="px-2 py-1 rounded text-xs font-mono bg-slate-100 dark:bg-slate-800 flex items-center justify-between" [class.ring-2]="(innerIndex===pile.length-1) && (pIndex===piles.length-1)" [class.ring-indigo-500]="(innerIndex===pile.length-1) && (pIndex===piles.length-1)">
+                    <span>{{ val }}</span>
+                  </div>
+                }
+              </div>
+              <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-400">top={{ pileTops[pIndex] }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Stats & Messages -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Step: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Comparisons: <span class="font-semibold">{{ comparisons }}</span></div>
+          <div *ngIf="mode==='dp'">Updates: <span class="font-semibold">{{ updates }}</span></div>
+          <div>LIS Length: <span class="font-semibold">{{ bestLen }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Current LIS</h4>
+        @if (lisPathIndices.length === 0) {
+          <p class="text-xs text-gray-500">No subsequence reconstructed yet.</p>
+        } @else {
+          <div class="flex flex-wrap gap-2 items-center">
+            @for (idx of lisPathIndices; track idx) {
+              <div class="px-2 py-1 rounded bg-emerald-500 text-white text-xs font-semibold shadow shadow-emerald-500/30 flex items-center gap-1">
+                <span class="font-mono">{{ arr[idx] }}</span>
+                <span class="text-[10px] opacity-75">(#{{ idx }})</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li><strong>DP:</strong> Time <code>O(n²)</code>, Space <code>O(n)</code></li>
+          <li><strong>Patience:</strong> Time <code>O(n log n)</code>, Space <code>O(n)</code></li>
+          <li>Both reconstructions take linear extra work.</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">Patience gives length efficiently; to reconstruct a path we maintain parent pointers.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">DP Pseudocode</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>dp[i] = 1
+prev[i] = -1
+for i in [0..n-1]:
+  for j in [0..i-1]:
+    if a[j] < a[i] and dp[j] + 1 > dp[i]:
+       dp[i] = dp[j] + 1
+       prev[i] = j
+answer = max(dp)
+reconstruct by following prev from argmax</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Patience Pseudocode</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>tails = []  # minimal tail for each length
+parent = [] # for reconstruction
+for i, x in enumerate(a):
+  k = lower_bound(tails, x)
+  if k == len(tails): tails.append(x)
+  else: tails[k] = x
+  # link parent to previous tail index at length k-1
+length = len(tails)
+reconstruct by walking stored parent pointers</code></pre>
+      </div>
+    </div>
   </div>
 </ui-card>
-

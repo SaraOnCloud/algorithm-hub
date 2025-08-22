@@ -11,15 +11,15 @@ import { map } from 'rxjs/operators';
   selector: 'app-algorithm-detail',
   imports: [CommonModule, RouterLink],
   template: `
-    <a routerLink="/algorithms">← Volver</a>
-    <div *ngIf="loading">Cargando...</div>
+    <a routerLink="/algorithms">← Back</a>
+    <div *ngIf="loading">Loading...</div>
     <div *ngIf="algo">
       <h2>{{ algo.name }}</h2>
       <p><strong>Slug:</strong> {{ algo.slug }}</p>
-      <p><strong>Categoría:</strong> {{ algo.category }} · <strong>Dificultad:</strong> {{ algo.difficulty }}</p>
+      <p><strong>Category:</strong> {{ algo.category }} · <strong>Difficulty:</strong> {{ algo.difficulty }}</p>
       <p>{{ algo.description }}</p>
       <button *ngIf="auth.isAuthenticated" (click)="toggle()" [disabled]="toggling">
-        {{ learned ? 'Desmarcar' : 'Marcar como aprendido' }}
+        {{ learned ? 'Unmark' : 'Mark as learned' }}
       </button>
     </div>
   `,

@@ -1,7 +1,136 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Activity Selection" subtitle="greedy · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Activity Selection.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Activity Selection" subtitle="interval scheduling · greedy · O(n log n) + O(n)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p>The classic <strong>Activity Selection</strong> (interval scheduling) problem: given activities with start and finish times, pick a maximum-size subset of non-overlapping activities. Greedy optimum: sort by increasing finish, then pick each activity whose start ≥ finish of the last chosen.</p>
+      <p><strong>Exchange argument intuition:</strong> Among all optimal solutions choose one with the earliest first finishing activity; if its first activity finishes later than the greedy first, swap them— optimal size preserved. Repeat.</p>
+      <p>Colors: <span class="bg-emerald-500 text-white px-1 rounded text-xs">Selected</span>, <span class="bg-rose-500 text-white px-1 rounded text-xs">Rejected</span>, <span class="bg-indigo-500 text-white px-1 rounded text-xs">Current</span>, neutral = pending.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col w-40">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="randomizeActivities()" [disabled]="running">Randomize</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="prepare()" [disabled]="running">Resort</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetAlgo()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+        <ui-button size="sm" variant="ghost" (click)="toggleOrderView()">{{ showSorted ? 'Show Original' : 'Show Sorted' }}</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Add activity form -->
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex flex-col w-24">
+        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">Start</label>
+        <input type="number" [(ngModel)]="newStart" class="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 text-sm" />
+      </div>
+      <div class="flex flex-col w-24">
+        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">End</label>
+        <input type="number" [(ngModel)]="newEnd" class="mt-1 w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 text-sm" />
+      </div>
+      <ui-button size="sm" variant="secondary" (click)="addActivity()" [disabled]="running || newStart==null || newEnd==null || newEnd<=newStart">Add</ui-button>
+      <label class="flex items-center gap-2 text-xs cursor-pointer select-none">
+        <input type="checkbox" [(ngModel)]="autoLabels" (change)="prepare()" class="accent-indigo-600" /> Auto Labels
+      </label>
+    </div>
+
+    <!-- Timeline Visualization -->
+    <div class="space-y-3">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Timeline (sorted by finish)</h3>
+      <div class="flex flex-col gap-2">
+        @for (act of sorted; track act.id) {
+          <div class="relative w-full h-8 bg-slate-100 dark:bg-slate-800 rounded overflow-hidden border border-slate-200 dark:border-slate-700">
+            <div [ngStyle]="{ left: barLeft(act), width: barWidth(act) }" [ngClass]="barClasses(act)" class="group">
+              <span class="px-1">{{ act.label }}</span>
+              <span class="absolute bottom-0 left-0 right-0 text-[9px] leading-none opacity-70 group-hover:opacity-100 transition">{{ act.start }}–{{ act.end }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <p class="text-[11px] text-gray-500 dark:text-gray-400">Bars scaled to overall time span; scan proceeds left → right.</p>
+    </div>
+
+    <!-- Activity Lists & Decisions -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">{{ showSorted ? 'Sorted by Finish (Greedy Order)' : 'Original Input Order' }}</h4>
+        <div class="flex flex-col gap-1 text-xs font-mono">
+          @for (act of displayedList(); track act.id) {
+            <div [class]="'flex items-center justify-between rounded px-2 py-1 border transition ' + (isChosen(act) ? 'bg-emerald-500 text-white border-emerald-500' : isRejected(act) ? 'bg-rose-500/80 text-white border-rose-500/60' : isCurrent(act) ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700')">
+              <span class="flex items-center gap-2"><span class="font-semibold">{{ act.label }}</span><span>[{{ act.start }}, {{ act.end }})</span></span>
+              <span class="opacity-70">Δ={{ act.duration }}</span>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Greedy State</h4>
+        <ul class="text-xs space-y-1 font-mono">
+          <li>index = {{ idx }} / {{ sorted.length }}</li>
+          <li>lastFinish = {{ displayLastFinish() }}</li>
+          <li>selected = {{ chosen.size }}</li>
+          <li>rejected = {{ rejected.size }}</li>
+          <li>percent selected = {{ percentChosen() | number:'1.0-2' }}%</li>
+        </ul>
+        <p class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Stats & Complexity -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Steps: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Comparisons: <span class="font-semibold">{{ comparisons }}</span></div>
+          <div>Choices: <span class="font-semibold">{{ chosen.size + rejected.size }}</span></div>
+        </div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Sort: <code>O(n log n)</code></li>
+          <li>Scan: <code>O(n)</code></li>
+          <li>Space: <code>O(1)</code> extra</li>
+          <li>Optimal by exchange argument</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Key Idea</h4>
+        <p class="text-[11px] leading-snug text-gray-600 dark:text-gray-400">Choosing the earliest finishing frees the schedule earliest; any optimal schedule can be transformed to the greedy one without losing activities.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Greedy Procedure</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>sort by finish ascending (tie: start)
+lastFinish = -∞
+S = []
+for a in activities:
+  if a.start >= lastFinish:
+    S.append(a)
+    lastFinish = a.finish</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Decision Rule</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>Accept if start ≥ lastFinish
+Reject if start < lastFinish</code></pre>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-2">Sentinel -∞ makes the first activity always acceptable.</p>
+      </div>
+    </div>
   </div>
 </ui-card>
-

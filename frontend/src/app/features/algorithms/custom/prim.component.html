@@ -1,7 +1,156 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Prim" subtitle="graph · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Prim.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Prim's Minimum Spanning Tree" subtitle="graph · greedy · O(E log V) with PQ (simplified O(V^2) here)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Prim's algorithm</strong> grows a Minimum Spanning Tree (MST) from a starting node by repeatedly picking the lightest edge crossing the cut between visited (MST) and unvisited nodes.</p>
+      <p>This visualization uses the simple <code>O(V^2)</code> array-based implementation (no priority queue) so you can watch the key[] values update. Each step either selects the next node (min key) or relaxes its outgoing edges.</p>
+      <p>Click a node before starting to choose the root. Press Play to animate or Step manually.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Nodes: {{ nodeCount }}</label>
+        <input type="range" min="4" max="16" [(ngModel)]="nodeCount" (change)="nodeCountChanged()" class="w-44 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Density: {{ dense | number:'1.0-2' }}</label>
+        <input type="range" min="0.2" max="1" step="0.05" [(ngModel)]="dense" (change)="generateGraph()" class="w-44 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-44 accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="generateGraph()" [disabled]="running">Regenerate</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetAlgo()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Graph SVG -->
+    <div class="relative w-full overflow-x-auto">
+      <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phase: <span class="font-semibold">{{ phase }}</span> • Selected: {{ selectedCount }}/{{ nodeCount }}</div>
+      <svg [attr.viewBox]="'0 0 ' + svgWidth + ' ' + svgHeight" class="w-full max-w-full bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
+        <!-- Edges -->
+        <g stroke-width="2">
+          @for (e of edges; track edgeKey(e.a,e.b)) {
+            <line [attr.x1]="nodeX(e.a)" [attr.y1]="nodeY(e.a)" [attr.x2]="nodeX(e.b)" [attr.y2]="nodeY(e.b)" [attr.stroke]="edgeStroke(e.a,e.b)" [attr.opacity]="edgeOpacity(e.a,e.b)" class="transition-all duration-300" />
+            <!-- Weight label midpoint -->
+            <g *ngIf="isEdgeInMST(e.a,e.b) || isEdgeRelaxing(e.a,e.b)">
+              <rect [attr.x]="(nodeX(e.a)+nodeX(e.b))/2 - 14" [attr.y]="(nodeY(e.a)+nodeY(e.b))/2 - 9" width="28" height="16" rx="3" class="fill-slate-900/80 text-white" />
+              <text [attr.x]="(nodeX(e.a)+nodeX(e.b))/2" [attr.y]="(nodeY(e.a)+nodeY(e.b))/2 + 3" text-anchor="middle" class="fill-white text-[10px] font-mono">{{ weightMatrix[e.a][e.b] }}</text>
+            </g>
+          }
+        </g>
+        <!-- Nodes -->
+        <g>
+          @for (n of nodes; track n.id) {
+            <g (click)="clickNode(n.id)" class="cursor-pointer group">
+              <circle [attr.cx]="nodeX(n.id)" [attr.cy]="nodeY(n.id)" r="18" stroke-width="2" [ngClass]="[nodeFill(n.id), nodeStroke(n.id)]" class="transition-all duration-300" />
+              <text [attr.x]="nodeX(n.id)" [attr.y]="nodeY(n.id)+4" text-anchor="middle" class="select-none font-semibold text-[11px] fill-white">{{ n.id }}</text>
+              <g *ngIf="!inMST[n.id] && key[n.id] < INF">
+                <rect [attr.x]="nodeX(n.id)-22" [attr.y]="nodeY(n.id)+22" width="44" height="16" rx="4" class="fill-indigo-600/80" />
+                <text [attr.x]="nodeX(n.id)" [attr.y]="nodeY(n.id)+34" text-anchor="middle" class="fill-white text-[10px] font-mono">k={{ key[n.id] }}</text>
+              </g>
+            </g>
+          }
+        </g>
+      </svg>
+      <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Legend: Green = in MST, Indigo pulse = next candidate, Amber edge = relaxing, Green edge = chosen MST edge.</p>
+    </div>
+
+    <!-- MST Edge List -->
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">MST Edges</h3>
+      @if (mstEdges().length === 0 && !finished) {
+        <p class="text-xs text-gray-500">No edges yet. Select the first node.</p>
+      } @else if (mstEdges().length === 0 && finished) {
+        <p class="text-xs text-gray-500">Graph has no spanning edges.</p>
+      } @else {
+        <div class="flex flex-wrap gap-2 text-xs font-mono">
+          @for (e of mstEdges(); track edgeKey(e.a,e.b)) {
+            <div class="px-2 py-1 rounded bg-emerald-500 text-white shadow shadow-emerald-500/30 flex items-center gap-1">
+              ({{ e.a }},{{ e.b }})<span class="opacity-75">w={{ e.w }}</span>
+            </div>
+          }
+          <div class="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100">Total = {{ totalWeight() }}</div>
+        </div>
+      }
+    </div>
+
+    <!-- Stats -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Steps: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Selects: <span class="font-semibold">{{ selections }}</span></div>
+          <div>Relaxations: <span class="font-semibold">{{ relaxations }}</span></div>
+          <div>Updates: <span class="font-semibold">{{ updates }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Current</h4>
+        @if (!finished) {
+          <ul class="text-xs space-y-1 font-mono">
+            <li>phase = {{ phase }}</li>
+            <li>current = {{ currentNode === null ? '-' : currentNode }}</li>
+            <li>next candidate = {{ candidateNext === null ? '-' : candidateNext }}</li>
+            <li>relax idx = {{ relaxIndex }}/{{ relaxingNeighbors.length }}</li>
+          </ul>
+        } @else {
+          <p class="text-xs text-gray-500">Done.</p>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Simple impl: <code>O(V^2)</code></li>
+          <li>With binary heap: <code>O(E log V)</code></li>
+          <li>Space: <code>O(V)</code> for key + parent</li>
+          <li>Greedy: picks global lightest crossing edge</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">Using a priority queue lowers complexity for sparse graphs.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Array-Based Prim (O(V^2))</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>for v: key[v] = ∞, parent[v] = -1
+key[start] = 0
+repeat V times:
+  u = argmin key[v] among v not in MST
+  add u to MST
+  for each edge (u, v):
+    if v not in MST and w(u,v) < key[v]:
+       key[v] = w(u,v)
+       parent[v] = u</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Priority Queue Variant</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>push (0, start)
+while pq not empty:
+  (k, u) = extract-min
+  if u already in MST: continue
+  add u to MST
+  for each edge (u, v):
+    if v not in MST and w < key[v]:
+       key[v] = w
+       parent[v] = u
+       push (key[v], v)</code></pre>
+      </div>
+    </div>
   </div>
 </ui-card>
-

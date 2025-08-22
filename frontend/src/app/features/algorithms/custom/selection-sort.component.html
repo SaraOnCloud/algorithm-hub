@@ -1,7 +1,109 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Selection Sort" subtitle="sorting · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Selection Sort.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Selection Sort" subtitle="sorting · O(n^2) · in-place">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Selection Sort</strong> repeatedly selects the minimum element from the unsorted suffix and swaps it into the next position of the sorted prefix. It performs at most <code>n - 1</code> swaps, but still uses <code>O(n^2)</code> comparisons.</p>
+      <p>Colors: <span class="bg-emerald-500 text-white px-1 rounded text-xs">Sorted</span> fixed prefix, <span class="bg-indigo-600 text-white px-1 rounded text-xs">Current Min</span>, <span class="bg-amber-500 text-white px-1 rounded text-xs">Scanning</span>, <span class="bg-slate-300 px-1 rounded text-xs">Active</span>. A green outline highlights an ongoing swap.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Size: {{ size }}</label>
+        <input type="range" min="3" max="60" [(ngModel)]="size" (change)="randomizeArray()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="randomizeArray()" [disabled]="running">Randomize</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetAlgo()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Array Visualization -->
+    <div>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Array</h3>
+      <div class="relative overflow-x-auto">
+        <div class="flex gap-2 items-end min-h-[260px] pb-4">
+          @for (v of arr; track $index) {
+            <div class="flex flex-col items-center gap-1 w-10">
+              <div [ngClass]="barClasses($index)" [ngStyle]="{height: barHeight(v)}">
+                <span class="absolute top-1 left-1 text-[9px] opacity-60">{{$index}}</span>
+                <span class="mb-1">{{ v }}</span>
+                @if ($index === minIdx && !finished) { <span class="absolute -top-2 right-1 text-[10px] font-bold">min</span> }
+                @if ($index === j && !finished && !swapping && j < n) { <span class="absolute -top-2 left-1 text-[10px] font-bold">j</span> }
+              </div>
+              @if (isSorted($index)) { <div class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400">✓</div> }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Steps: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Comparisons: <span class="font-semibold">{{ comparisons }}</span></div>
+          <div>Swaps: <span class="font-semibold">{{ swaps }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Current State</h4>
+        <ul class="text-xs space-y-1 font-mono">
+          <li>i = {{ i }} (sorted prefix size {{ i }})</li>
+          <li>j = {{ j }} / {{ n - 1 }}</li>
+          <li>minIdx = {{ minIdx }}</li>
+          <li>swapping = {{ swapping }}</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Time: <code>O(n^2)</code> comparisons</li>
+          <li>Swaps: ≤ <code>n - 1</code></li>
+          <li>Space: <code>O(1)</code></li>
+          <li>Stable: No (basic form)</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">Efficient when swaps are costly, but still poor asymptotics.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Pseudocode</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>for i in [0..n-2]:
+  min = i
+  for j in [i+1..n-1]:
+    if a[j] < a[min]:
+       min = j
+  if min != i:
+    swap a[i], a[min]</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Notes</h4>
+        <ul class="text-xs space-y-1">
+          <li>Always scans full unsorted suffix.</li>
+          <li>Good when memory writes are expensive.</li>
+          <li>Unstable: equal items may reorder.</li>
+          <li>Adaptive variants (e.g. selection networks) exist.</li>
+        </ul>
+      </div>
+    </div>
   </div>
 </ui-card>
-

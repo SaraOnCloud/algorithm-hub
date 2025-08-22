@@ -1,7 +1,131 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Merge Sort" subtitle="sorting · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Merge Sort.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Merge Sort" subtitle="divide & conquer · stable · O(n log n)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Merge Sort</strong> is a classic divide & conquer algorithm. It splits the array into halves recursively (or iteratively doubles run width) and merges sorted subarrays. It guarantees <code>O(n log n)</code> time, is stable, and requires <code>O(n)</code> auxiliary space.</p>
+      <p>This visualization uses the <em>bottom-up</em> iterative variant: start with width=1 (trivial runs) and repeatedly merge adjacent runs of length <code>width</code>, then double <code>width</code>. Watch how pairs combine into larger sorted blocks.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Size: {{ size }}</label>
+        <input type="range" min="3" max="60" [(ngModel)]="size" (change)="randomizeArray()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="randomizeArray()" [disabled]="running">Randomize</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetState()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+      <div class="flex items-center gap-2 text-xs" *ngIf="finished">
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="h-2 rounded bg-gray-200 dark:bg-gray-800 overflow-hidden">
+      <div class="h-full bg-indigo-500 transition-all" [style.width.%]="progressPercent()"></div>
+    </div>
+
+    <!-- Array visualization -->
+    <div>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Array</h3>
+      <div class="relative overflow-x-auto">
+        <div class="flex gap-2 items-end min-h-[260px] pb-4">
+          @for (v of arr; track $index) {
+            <div class="flex flex-col items-center gap-1 w-10">
+              <div [ngClass]="barClasses($index)" [ngStyle]="{height: barHeight(v)}">
+                <span class="absolute top-1 left-1 text-[9px] opacity-60">{{$index}}</span>
+                <span class="mb-1">{{ v }}</span>
+              </div>
+              @if (isInCurrentRange($index)) {
+                <div class="text-[10px] font-mono px-1 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-200">w={{ width }}</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Auxiliary array snapshot for current pass -->
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Auxiliary Copy (start of pass)</h3>
+      <div class="flex gap-1 flex-wrap text-[10px] font-mono">
+        @for (v of aux; track $index) {
+          <div class="px-2 py-1 rounded border border-gray-300 dark:border-gray-700" [ngClass]="isInCurrentRange($index) ? 'bg-indigo-100 dark:bg-indigo-900/40' : ''">{{ v }}</div>
+        }
+      </div>
+    </div>
+
+    <!-- Stats & messages -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Step: <span class="font-semibold">{{ stepCount }}</span></div>
+            <div>Passes: <span class="font-semibold">{{ passesCompleted }}</span></div>
+            <div>Merges: <span class="font-semibold">{{ mergesCompleted }}</span></div>
+            <div>Comparisons: <span class="font-semibold">{{ comparisons }}</span></div>
+            <div>Writes: <span class="font-semibold">{{ writes }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Current Merge</h4>
+        @if (!finished) {
+          <ul class="text-xs space-y-1 font-mono">
+            <li>width = {{ width }}</li>
+            <li>range = [{{ leftStart }}, {{ rightEnd }})</li>
+            <li>mid = {{ mid }}</li>
+            <li>i = {{ i }} j = {{ j }} k = {{ k }}</li>
+          </ul>
+        } @else {
+          <p class="text-xs text-gray-500">No active merge (done).</p>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Time: <code>O(n log n)</code> (always)</li>
+          <li>Space: <code>O(n)</code> auxiliary</li>
+          <li>Stable: Yes</li>
+          <li>In-place: No (needs aux)</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">Bottom-up avoids recursion overhead and is iterative.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Bottom-Up Pseudocode</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>width = 1
+while width < n:
+  copy a -> aux
+  for left in range(0, n, 2*width):
+    mid = min(left + width, n)
+    right = min(left + 2*width, n)
+    merge(aux[left:mid], aux[mid:right]) into a[left:right]
+  width *= 2</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Merge Procedure</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>i = left, j = mid, k = left
+while i < mid and j < right:
+  if aux[i] <= aux[j]: a[k++] = aux[i++]
+  else:               a[k++] = aux[j++]
+while i < mid:  a[k++] = aux[i++]
+while j < right: a[k++] = aux[j++]</code></pre>
+      </div>
+    </div>
   </div>
 </ui-card>
-

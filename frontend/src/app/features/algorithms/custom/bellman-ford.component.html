@@ -1,26 +1,26 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
 <ui-card title="Bellman-Ford" subtitle="graph · medium" [hasActions]="true">
   <div class="flex flex-col gap-4">
-    <!-- Toolbar principal -->
+    <!-- Main toolbar -->
     <div class="flex flex-wrap items-center gap-2">
-      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Reproducir</ui-button>
-      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pausa</ui-button>
-      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Paso</ui-button>
-      <ui-button variant="ghost" size="sm" (click)="reset()">↻ Reiniciar</ui-button>
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Play</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pause</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Step</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="reset()">↻ Reset</ui-button>
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
-      <label class="text-sm text-gray-700">Velocidad</label>
+      <label class="text-sm text-gray-700">Speed</label>
       <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
       <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
-      <label class="text-sm text-gray-700">Origen</label>
+      <label class="text-sm text-gray-700">Source</label>
       <select [(ngModel)]="sourceId" (ngModelChange)="setSource($event)" class="rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500">
         <option *ngFor="let n of nodes" [value]="n.id">{{ n.id }}</option>
       </select>
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
-      <ui-button size="sm" variant="outline" (click)="randomizeWeights()">🎲 Aleatorizar pesos</ui-button>
+      <ui-button size="sm" variant="outline" (click)="randomizeWeights()">🎲 Randomize weights</ui-button>
     </div>
 
-    <!-- Mensaje de estado -->
+    <!-- Status message -->
     <div class="text-sm text-gray-700 flex items-center gap-2">
       <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
         'bg-green-500 animate-pulse': running,
@@ -29,7 +29,7 @@
         'bg-red-500': negativeCycle
       }"></span>
       <span class="font-medium">{{ lastMessage }}</span>
-      <span class="ml-auto text-xs text-gray-500">Iteración {{ iter }}/{{ totalIterations }} · Arista {{ edgeIndex + 1 }}/{{ edges.length }} · Fase: {{ phase }}</span>
+      <span class="ml-auto text-xs text-gray-500">Iteration {{ iter }}/{{ totalIterations }} · Edge {{ edgeIndex + 1 }}/{{ edges.length }} · Phase: {{ phase }}</span>
     </div>
 
     <!-- Lienzo del grafo -->
@@ -95,14 +95,14 @@
       </svg>
     </div>
 
-    <!-- Tabla de distancias -->
+    <!-- Nodes table -->
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="text-left text-gray-600">
-            <th class="py-2 pr-4">Nodo</th>
-            <th class="py-2 pr-4">Distancia</th>
-            <th class="py-2 pr-4">Previo</th>
+            <th class="py-2 pr-4">Node</th>
+            <th class="py-2 pr-4">Distance</th>
+            <th class="py-2 pr-4">Previous</th>
           </tr>
         </thead>
         <tbody>
@@ -121,17 +121,17 @@
       </table>
     </div>
 
-    <!-- Alertas -->
+    <!-- Alerts -->
     <div *ngIf="negativeCycle" class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-      Se detectó un ciclo negativo alcanzable desde el origen.
+      A reachable negative cycle was detected from the source.
     </div>
     <div *ngIf="finished && !negativeCycle" class="rounded-md border border-purple-200 bg-purple-50 p-3 text-sm text-purple-800">
-      Algoritmo completado correctamente. Puedes reiniciar o cambiar el origen.
+      Algorithm finished. You can reset or change the source.
     </div>
   </div>
 
   <div class="card-actions flex items-center justify-end gap-2">
-    <ui-button variant="ghost" size="sm" (click)="reset()">Reiniciar</ui-button>
-    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()" [loading]="false">{{ running ? 'Pausar' : 'Reproducir' }}</ui-button>
+    <ui-button variant="ghost" size="sm" (click)="reset()">Reset</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()" [loading]="false">{{ running ? 'Pause' : 'Play' }}</ui-button>
   </div>
 </ui-card>

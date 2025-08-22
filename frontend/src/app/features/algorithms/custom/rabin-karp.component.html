@@ -1,7 +1,133 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Rabin-Karp" subtitle="string · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Rabin-Karp.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Rabin-Karp String Search" subtitle="rolling hash · expected O(n + m)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Rabin-Karp</strong> finds pattern occurrences in a text by comparing rolling hash values instead of full substrings each time. When hashes match, it verifies characters to rule out collisions.</p>
+      <p>The rolling hash used here is a polynomial hash: <code>H(s[0..m-1]) = (s[0]*b^(m-1) + ... + s[m-1]) mod M</code>. We slide the window by removing the leading character and appending the next one in O(1).</p>
+      <p>Colors: <span class="bg-indigo-500 text-white px-1 rounded text-xs">Window</span> current window, <span class="bg-emerald-500 text-white px-1 rounded text-xs">Match</span> confirmed match starts. Toggle play or step manually to advance windows.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="w-64">
+        <ui-input label="Text" [(ngModel)]="text" (ngModelChange)="recomputeAll()" />
+      </div>
+      <div class="w-44">
+        <ui-input label="Pattern" [(ngModel)]="pattern" (ngModelChange)="recomputeAll()" />
+      </div>
+      <div class="flex flex-col w-32">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Base: {{ base }}</label>
+        <input type="range" min="2" max="1000" [(ngModel)]="base" (change)="updateBaseOrMod()" class="accent-indigo-600" />
+      </div>
+      <div class="flex flex-col w-44">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="recomputeAll()" [disabled]="running">Recompute</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="regenerateRandomText()" [disabled]="running">Random Text</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="randomPatternFromText()" [disabled]="running">Pick Pattern</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+        <ui-button size="sm" variant="ghost" (click)="toggleCharCodes()">{{ showCharCodes ? 'Hide Codes' : 'Show Codes' }}</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Hash Summary -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Hashes</h4>
+        <ul class="text-xs font-mono space-y-1">
+          <li>patternHash = {{ patternHash }}</li>
+          <li>windowHash = {{ windowHash }}</li>
+          <li>highestPow = {{ highestPow }}</li>
+          <li>base = {{ base }} mod = {{ mod }}</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Progress</h4>
+        <ul class="text-xs font-mono space-y-1">
+          <li>window start i = {{ i }}</li>
+          <li>windows = {{ Math.max(0, n - m + 1) }}</li>
+          <li>steps = {{ stepCount }}</li>
+          <li>matches = {{ matchCount() }}</li>
+        </ul>
+        <p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">{{ lastMessage }}</p>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Statistics</h4>
+        <ul class="text-xs font-mono space-y-1">
+          <li>hash comps = {{ hashComparisons }}</li>
+          <li>char comps = {{ charComparisons }}</li>
+          <li>collisions = {{ collisions }}</li>
+          <li>collision rate = {{ (collisionRate()*100) | number:'1.1-2' }}%</li>
+        </ul>
+        <p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">Collisions occur when hashes match but characters differ.</p>
+      </div>
+    </div>
+
+    <!-- Text Visualization -->
+    <div class="space-y-3">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Text & Sliding Window</h3>
+      <div class="overflow-x-auto">
+        <div class="flex items-end gap-1 flex-wrap">
+          @for (ch of textChars(); track $index) {
+            <div class="relative flex flex-col items-center">
+              <div [class]="'px-2 py-1 rounded border text-sm font-mono transition-all ' + (isMatchStart($index) ? 'bg-emerald-500 text-white border-emerald-500 shadow shadow-emerald-500/30' : isInWindow($index) ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200')">
+                {{ ch === ' ' ? '·' : ch }}
+              </div>
+              @if (showCharCodes) {
+                <div class="text-[10px] font-mono text-gray-500 dark:text-gray-400">{{ ch.charCodeAt(0) }}</div>
+              }
+              @if (isMatchStart($index)) {
+                <div class="mt-0.5 text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">match</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="text-[11px] text-gray-500 dark:text-gray-400">Current window: indices [{{ i }}, {{ i + m - 1 }}]</div>
+    </div>
+
+    <!-- Pattern alignment preview -->
+    <div class="space-y-2">
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Alignment</h3>
+      <div class="relative overflow-x-auto">
+        <div class="flex gap-1 flex-wrap font-mono text-sm">
+          @for (ch of patternChars(); track $index) {
+            <div [class]="'px-2 py-1 rounded border ' + (finished ? (matches.includes(i-1) && $index===0 ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700') : 'bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700')" >{{ ch === ' ' ? '·' : ch }}</div>
+          }
+        </div>
+      </div>
+      <p class="text-[11px] text-gray-500 dark:text-gray-400">Pattern shown independently; use window highlight above to see position.</p>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Rabin-Karp Pseudocode</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>compute hash(P)
+compute hash(text[0..m-1])
+for i in 0..n-m:
+  if hash(window) == hash(P):
+     if window == P: report match
+  if i < n-m:
+     roll hash to next window</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Rolling Hash Update</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>remove = old_char * base^(m-1) mod M
+h = (h - remove) mod M
+h = (h * base + next_char) mod M</code></pre>
+        <p class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">We use a large prime modulus to keep collision probability low.</p>
+      </div>
+    </div>
   </div>
 </ui-card>
-

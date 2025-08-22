@@ -1,7 +1,130 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Quick Sort" subtitle="sorting · medium">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Quick Sort.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Quick Sort" subtitle="divide & conquer · expected O(n log n)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Quick Sort</strong> partitions the array around a pivot so that smaller elements are left, larger elements are right, then recurses on subranges. The efficiency heavily depends on pivot quality. Random pivot selection yields expected <code>O(n log n)</code> time; worst case is <code>O(n²)</code>.</p>
+      <p>This visualization uses the Lomuto partition scheme (scan index <code>i</code>, store pointer <code>s</code>, pivot at end). Colors: green = fixed/final position, indigo = pivot, amber = scanning index, blue = store pointer, gray = current segment, faded = inactive segment.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Size: {{ size }}</label>
+        <input type="range" min="3" max="60" [(ngModel)]="size" (change)="randomizeArray()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col gap-1 text-xs font-mono">
+        <span class="font-semibold text-gray-500 dark:text-gray-400">Pivot Strategy</span>
+        <div class="flex items-center gap-2">
+          <label class="inline-flex items-center gap-1 text-[11px] cursor-pointer select-none">
+            <input type="checkbox" [(ngModel)]="randomPivot" (change)="togglePivotStrategy()" [disabled]="running" class="accent-indigo-600" /> Random
+          </label>
+          <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-[10px]">{{ pivotStrategyLabel() }}</span>
+        </div>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="randomizeArray()" [disabled]="running">Randomize</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetAlgo()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Finished</span>
+      </div>
+    </div>
+
+    <!-- Array Visualization -->
+    <div>
+      <h3 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Array</h3>
+      <div class="relative overflow-x-auto">
+        <div class="flex gap-2 items-end min-h-[260px] pb-4">
+          @for (v of arr; track $index) {
+            <div class="flex flex-col items-center gap-1 w-10">
+              <div [ngClass]="barClasses($index)" [ngStyle]="{height: barHeight(v)}">
+                <span class="absolute top-1 left-1 text-[9px] opacity-60">{{$index}}</span>
+                <span class="mb-1">{{ v }}</span>
+                @if (segmentLabel($index)) {
+                  <span class="absolute -top-2 right-1 text-[10px] font-bold">{{ segmentLabel($index) }}</span>
+                }
+              </div>
+              @if (inCurrentSegment($index)) {
+                <div class="text-[9px] font-mono px-1 py-0.5 rounded bg-gray-100 dark:bg-gray-800">seg</div>
+              }
+              @if (isFixed($index)) {
+                <div class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400">✓</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Steps: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Partitions: <span class="font-semibold">{{ partitions }}</span></div>
+          <div>Comparisons: <span class="font-semibold">{{ comparisons }}</span></div>
+          <div>Swaps: <span class="font-semibold">{{ swaps }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Current Segment</h4>
+        @if (current) {
+          <ul class="text-xs space-y-1 font-mono">
+            <li>[l,r] = [{{ current.l }}, {{ current.r }}]</li>
+            <li>phase = {{ current.phase }}</li>
+            <li>i = {{ current.i }} store = {{ current.store }}</li>
+            <li>pivot = {{ current.pivotVal === null ? '-' : current.pivotVal }} (pos {{ current.pivotPos }})</li>
+            <li>stack depth = {{ stackDepth() }} max depth = {{ maxDepth }}</li>
+          </ul>
+        } @else {
+          <p class="text-xs text-gray-500">No active segment.</p>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Expected: <code>O(n log n)</code></li>
+            <li>Worst: <code>O(n^2)</code></li>
+            <li>Space (stack): <code>O(log n)</code> average</li>
+            <li>Unstable, in-place</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">Random pivot reduces chance of degenerate partitions.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Lomuto Partition</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>pivot = A[r]
+store = l
+for i in [l..r-1]:
+  if A[i] <= pivot:
+    swap A[i], A[store]
+    store++
+swap A[store], A[r]
+return store</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="font-semibold text-sm tracking-wide uppercase text-gray-500 dark:text-gray-400 mb-2">Quick Sort (recursive)</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>quick(l, r):
+  if l >= r: return
+  p = partition(l, r)
+  quick(l, p-1)
+  quick(p+1, r)</code></pre>
+      </div>
+    </div>
   </div>
 </ui-card>
-

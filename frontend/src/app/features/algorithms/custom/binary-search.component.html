@@ -1,36 +1,36 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
+<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Back</a>
 <ui-card title="Binary Search" subtitle="search · easy" [hasActions]="true">
   <div class="flex flex-col gap-4">
     <!-- Toolbar -->
     <div class="flex flex-wrap items-center gap-2">
-      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Reproducir</ui-button>
-      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pausa</ui-button>
-      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Paso</ui-button>
-      <ui-button variant="ghost" size="sm" (click)="resetAll()">↻ Reiniciar</ui-button>
+      <ui-button variant="primary" size="sm" (click)="play()" [disabled]="running || finished">▶ Play</ui-button>
+      <ui-button variant="secondary" size="sm" (click)="pause()" [disabled]="!running">⏸ Pause</ui-button>
+      <ui-button variant="outline" size="sm" (click)="step()" [disabled]="finished">⏭ Step</ui-button>
+      <ui-button variant="ghost" size="sm" (click)="resetAll()">↻ Reset</ui-button>
 
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
 
-      <label class="text-sm text-gray-700">Velocidad</label>
+      <label class="text-sm text-gray-700">Speed</label>
       <input type="range" min="0.25" max="2" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-40" />
       <span class="text-xs text-gray-600">x{{ speedMultiplier }}</span>
 
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
 
-      <label class="text-sm text-gray-700">Tamaño</label>
+      <label class="text-sm text-gray-700">Size</label>
       <input type="number" class="w-20 rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
              [ngModel]="size" (ngModelChange)="setSize($event)" min="3" max="30" />
-      <ui-button size="sm" variant="outline" (click)="randomizeArray()">🎲 Aleatorizar array</ui-button>
+      <ui-button size="sm" variant="outline" (click)="randomizeArray()">🎲 Randomize</ui-button>
 
       <span class="mx-2 h-5 w-px bg-gray-300"></span>
 
-      <label class="text-sm text-gray-700">Objetivo</label>
+      <label class="text-sm text-gray-700">Target</label>
       <input type="number" class="w-28 rounded-md border-gray-300 bg-white text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
-             [ngModel]="target" (ngModelChange)="target = ($event===null || $event==='') ? null : +$event" placeholder="(número)" />
-      <ui-button size="sm" variant="outline" (click)="pickExistingTarget()">🎯 Del array</ui-button>
-      <ui-button size="sm" variant="outline" (click)="pickMissingTarget()">🚫 Ausente</ui-button>
+             [ngModel]="target" (ngModelChange)="target = ($event===null || $event==='') ? null : +$event" placeholder="(number)" />
+      <ui-button size="sm" variant="outline" (click)="pickExistingTarget()">🎯 In array</ui-button>
+      <ui-button size="sm" variant="outline" (click)="pickMissingTarget()">🚫 Missing</ui-button>
     </div>
 
-    <!-- Estado -->
+    <!-- Status -->
     <div class="text-sm text-gray-700 flex items-center gap-2">
       <span class="inline-flex h-2 w-2 rounded-full" [ngClass]="{
         'bg-green-500 animate-pulse': running,
@@ -39,18 +39,18 @@
         'bg-red-500': finished && foundIndex === null
       }"></span>
       <span class="font-medium">{{ lastMessage }}</span>
-      <span class="ml-auto text-xs text-gray-500">Paso {{ stepCount }} · [L={{ left }} R={{ right }} M={{ mid }}] · Objetivo: {{ target === null ? '—' : target }}</span>
+      <span class="ml-auto text-xs text-gray-500">Step {{ stepCount }} · [L={{ left }} R={{ right }} M={{ mid }}] · Target: {{ target === null ? '—' : target }}</span>
     </div>
 
-    <!-- Leyenda -->
+    <!-- Legend -->
     <div class="flex flex-wrap items-center gap-3 text-xs text-gray-600">
-      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border border-gray-300 bg-white"></span> Fuera de rango</span>
-      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-primary-50 border border-primary-200"></span> En rango [L..R]</span>
-      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border-2 border-accent"></span> Medio (M)</span>
-      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-green-200 border border-green-400"></span> Encontrado</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border border-gray-300 bg-white"></span> Out of range</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-primary-50 border border-primary-200"></span> In range [L..R]</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded border-2 border-accent"></span> Mid (M)</span>
+      <span class="inline-flex items-center gap-1"><span class="h-3 w-3 rounded bg-green-200 border border-green-400"></span> Found</span>
     </div>
 
-    <!-- Visualización del array -->
+    <!-- Array visualization -->
     <div class="overflow-x-auto">
       <div class="min-w-max">
         <div class="grid gap-2" [ngStyle]="{'grid-template-columns': 'repeat(' + arr.length + ', minmax(56px, 1fr))'}">
@@ -61,12 +61,12 @@
                  'border-primary-200 bg-primary-50': idxInRange(i) && foundIndex !== i,
                  'bg-green-200 border-green-400': foundIndex === i
                }">
-            <!-- Índice -->
+            <!-- Index -->
             <div class="absolute -top-2 left-1/2 -translate-x-1/2 text-[10px] text-gray-500 bg-white px-1 rounded border border-gray-200">{{ i }}</div>
-            <!-- Valor -->
+            <!-- Value -->
             <div class="text-sm font-semibold text-gray-800">{{ v }}</div>
 
-            <!-- Marcadores L/R/M -->
+            <!-- Markers L/R/M -->
             <div class="mt-2 flex items-center justify-center gap-1 text-[10px] font-semibold">
               <span *ngIf="i === left" class="px-1 rounded bg-gray-800 text-white">L</span>
               <span *ngIf="i === right" class="px-1 rounded bg-gray-800 text-white">R</span>
@@ -77,17 +77,16 @@
       </div>
     </div>
 
-    <!-- Ayuda -->
+    <!-- Help -->
     <div class="prose max-w-none text-sm text-gray-600">
       <p>
-        La búsqueda binaria reduce el rango [L..R] comparando el valor en M = floor((L+R)/2) con el objetivo.
-        Si arr[M] < objetivo, L = M + 1; si arr[M] > objetivo, R = M - 1.
+        Binary search shrinks the interval [L..R] comparing at midpoint M = floor((L+R)/2). If arr[M] < target set L = M + 1; if arr[M] > target set R = M - 1.
       </p>
     </div>
   </div>
 
   <div class="card-actions flex items-center justify-end gap-2">
-    <ui-button variant="ghost" size="sm" (click)="resetAll()">Reiniciar</ui-button>
-    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()">{{ running ? 'Pausar' : 'Reproducir' }}</ui-button>
+    <ui-button variant="ghost" size="sm" (click)="resetAll()">Reset</ui-button>
+    <ui-button variant="primary" size="sm" (click)="running ? pause() : play()">{{ running ? 'Pause' : 'Play' }}</ui-button>
   </div>
 </ui-card>

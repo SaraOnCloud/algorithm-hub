@@ -1,7 +1,161 @@
-<a routerLink="/algorithms" class="text-sm text-gray-600 hover:text-gray-900">← Volver</a>
-<ui-card title="Topological Sort" subtitle="graph · easy">
-  <div class="prose max-w-none">
-    <p>Página personalizada para Topological Sort.</p>
+<a routerLink="/algorithms" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 inline-flex items-center gap-1 mb-4 group">
+  <span class="transition-transform group-hover:-translate-x-0.5">←</span> Back
+</a>
+
+<ui-card title="Topological Sort (Kahn's Algorithm)" subtitle="DAG · ordering · O(V + E)">
+  <div class="flex flex-col gap-6">
+    <!-- Explanation -->
+    <section class="prose dark:prose-invert max-w-none leading-relaxed">
+      <p><strong>Topological sorting</strong> orders the vertices of a Directed Acyclic Graph (DAG) so every directed edge <code>u → v</code> goes from an earlier vertex to a later one.</p>
+      <p>This visualization uses <strong>Kahn's algorithm</strong>: repeatedly pick any node with indegree 0, append it to the order, remove its outgoing edges (decrementing indegrees). If at some point no indegree‑0 node exists while unprocessed nodes remain, the graph has a cycle.</p>
+      <p>Colors: <span class="bg-emerald-500 text-white px-1 rounded text-xs">Processed</span>, <span class="bg-indigo-500 text-white px-1 rounded text-xs">Current</span>, <span class="bg-indigo-300 text-indigo-900 px-1 rounded text-xs">Ready (indeg=0)</span>, edge <span class="text-emerald-600">green</span>=between processed, <span class="text-indigo-500">indigo</span>=from processed to unprocessed, <span class="text-amber-500">amber</span>=current relaxing edge.</p>
+    </section>
+
+    <!-- Controls -->
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Nodes: {{ nodeCount }}</label>
+        <input type="range" min="4" max="24" [(ngModel)]="nodeCount" (change)="regenerate()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Density: {{ density | number:'1.0-2' }}</label>
+        <input type="range" min="0.1" max="0.9" step="0.05" [(ngModel)]="density" (change)="regenerate()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex flex-col">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Speed × {{ speedMultiplier | number:'1.0-2' }}</label>
+        <input type="range" min="0.25" max="3" step="0.25" [(ngModel)]="speedMultiplier" (change)="onSpeedChange()" class="w-48 accent-indigo-600" />
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <ui-button size="sm" variant="secondary" (click)="regenerate()" [disabled]="running">Regenerate</ui-button>
+        <ui-button size="sm" variant="secondary" (click)="resetAlgo()" [disabled]="running">Reset</ui-button>
+        <ui-button size="sm" (click)="toggle()">{{ running ? 'Pause' : 'Play' }}</ui-button>
+        <ui-button size="sm" variant="outline" (click)="step()" [disabled]="running || finished">Step</ui-button>
+      </div>
+      <div class="flex items-center gap-2" *ngIf="finished">
+        <span *ngIf="!cycle" class="text-xs px-2 py-1 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30">Done</span>
+        <span *ngIf="cycle" class="text-xs px-2 py-1 rounded bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30">Cycle</span>
+      </div>
+    </div>
+
+    <!-- Graph SVG -->
+    <div class="relative w-full overflow-x-auto">
+      <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">Phase: <span class="font-semibold">{{ phase }}</span> • Processed: {{ order.length }}/{{ nodeCount }} • Queue size: {{ queue.length }}</div>
+      <svg [attr.viewBox]="'0 0 ' + svgWidth + ' ' + svgHeight" class="w-full max-w-full bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
+        <!-- Edges -->
+        <g stroke-width="2">
+          <defs>
+            <marker id="arrow-head" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,4 L0,8 z" fill="currentColor"></path>
+            </marker>
+          </defs>
+          @for (e of edges; track e.from + '-' + e.to) {
+            <line [attr.x1]="nodes[e.from].x" [attr.y1]="nodes[e.from].y" [attr.x2]="nodes[e.to].x" [attr.y2]="nodes[e.to].y" [attr.stroke]="edgeColor(e)" [attr.stroke-opacity]="edgeOpacity(e)" stroke-linecap="round" marker-end="url(#arrow-head)" class="transition-all duration-300" />
+          }
+        </g>
+        <!-- Nodes -->
+        <g>
+          @for (n of nodes; track n.id) {
+            <g>
+              <circle [attr.cx]="n.x" [attr.cy]="n.y" r="20" stroke-width="2" [ngClass]="[nodeFill(n), nodeStroke(n)]" class="transition-all duration-300" />
+              <text [attr.x]="n.x" [attr.y]="n.y + 5" text-anchor="middle" class="select-none font-semibold text-[12px] fill-white">{{ nodeLabel(n) }}</text>
+              <text [attr.x]="n.x" [attr.y]="n.y - 28" text-anchor="middle" class="text-[10px] font-mono fill-gray-600 dark:fill-gray-400">d={{ indeg[n.id] }}</text>
+            </g>
+          }
+        </g>
+      </svg>
+      <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Node labels show current indegree (d). Layout approximates longest-path levels.</p>
+    </div>
+
+    <!-- Queue & Order -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Queue (indegree 0)</h4>
+        @if (queueSorted().length === 0) {
+          <p class="text-xs text-gray-500">(empty)</p>
+        } @else {
+          <div class="flex flex-wrap gap-2">
+            @for (q of queueSorted(); track q) {
+              <div class="px-2 py-1 rounded bg-indigo-500 text-white text-xs font-semibold shadow shadow-indigo-500/30">{{ q }}</div>
+            }
+          </div>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Topological Order</h4>
+        @if (order.length === 0) {
+          <p class="text-xs text-gray-500">None selected yet.</p>
+        } @else {
+          <div class="flex flex-wrap gap-2">
+            @for (v of order; track v) {
+              <div class="px-2 py-1 rounded bg-emerald-500 text-white text-xs font-semibold shadow shadow-emerald-500/30">{{ v }}</div>
+            }
+          </div>
+        }
+        @if (cycle && finished) {
+          <p class="text-xs text-rose-600 dark:text-rose-400 mt-1 font-semibold">Cycle detected: partial order only.</p>
+        }
+      </div>
+    </div>
+
+    <!-- Stats & Messages -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Progress</h4>
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono">
+          <div>Steps: <span class="font-semibold">{{ stepCount }}</span></div>
+          <div>Indeg Updates: <span class="font-semibold">{{ indegUpdates }}</span></div>
+          <div>Enqueues: <span class="font-semibold">{{ enqueues }}</span></div>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">{{ lastMessage }}</div>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Current</h4>
+        @if (!finished) {
+          <ul class="text-xs space-y-1 font-mono">
+            <li>phase = {{ phase }}</li>
+            <li>current = {{ current === null ? '-' : current }}</li>
+            <li>edge index = {{ relaxIndex }}/{{ relaxingNeighbors.length }}</li>
+            <li>queue size = {{ queue.length }}</li>
+          </ul>
+        } @else {
+          <p class="text-xs text-gray-500">Done.</p>
+        }
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col gap-2">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Complexity</h4>
+        <ul class="text-xs space-y-1">
+          <li>Time: <code>O(V + E)</code></li>
+          <li>Space: <code>O(V)</code> (indegree + queue)</li>
+          <li>Detects cycle if not all vertices output</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400">If no indegree‑0 vertex exists but unprocessed remain ⇒ cycle.</p>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Kahn's Algorithm</h4>
+<pre class="text-[11px] leading-snug overflow-auto"><code>Q = all vertices with indeg = 0
+order = []
+while Q not empty:
+  u = pop(Q)
+  order.append(u)
+  for each v in adj[u]:
+    indeg[v]--
+    if indeg[v] == 0: push v into Q
+if len(order) < V: cycle exists</code></pre>
+      </div>
+      <div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+        <h4 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Use Cases</h4>
+        <ul class="text-xs space-y-1">
+          <li>Build / task scheduling</li>
+          <li>Course prerequisite ordering</li>
+          <li>Package dependency resolution</li>
+          <li>Detecting cycles in directed graphs</li>
+        </ul>
+        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">DFS postorder reverse is an alternative method (detects cycles via recursion stack).</p>
+      </div>
+    </div>
   </div>
 </ui-card>
-

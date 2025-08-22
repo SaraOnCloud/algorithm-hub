@@ -17,7 +17,7 @@ services:
       - internal
 
   phpmyadmin:
-    image: phpmyadmin:5.2.1  # multi-arch
+    image: phpmyadmin:5.2.1
     restart: unless-stopped
     environment:
       PMA_HOST: db
@@ -45,13 +45,8 @@ services:
         condition: service_healthy
     networks:
       - internal
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.${DOMAIN}`)"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.docker.network=traefik"
+    expose:
+      - "3000"
 
   frontend:
     build: ./frontend
@@ -61,45 +56,12 @@ services:
       - backend
     networks:
       - internal
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
-      - "traefik.docker.network=traefik"
-
-  traefik:
-    image: traefik:v3.0
-    command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--accesslog=true"
-      - "--log.level=INFO"
     ports:
       - "80:80"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik
-      - internal
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "traefik", "healthcheck"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-    labels:
-      - "traefik.enable=true"
 
 networks:
-  traefik:
-    name: traefik  # fuerza nombre sin prefijo para que coincida con label traefik.docker.network
-    driver: bridge
   internal:
     driver: bridge
 
 volumes:
   db_data:
-  traefik_letsencrypt:

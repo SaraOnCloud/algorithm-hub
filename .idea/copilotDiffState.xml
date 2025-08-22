@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/backend/.dockerignore">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/backend/.dockerignore" />
+              <option name="updatedContent" value="node_modules&#10;npm-debug.log&#10;yarn-error.log&#10;.dist&#10;coverage&#10;tmp&#10;.vscode&#10;.git&#10;.gitignore&#10;Dockerfile*&#10;.env&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/backend/Dockerfile">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/backend/Dockerfile" />
+              <option name="originalContent" value="# Backend (NestJS) multi-stage&#10;FROM node:20-alpine AS deps&#10;WORKDIR /app&#10;COPY package*.json ./&#10;RUN npm install --omit=optional&#10;&#10;FROM deps AS build&#10;COPY tsconfig*.json nest-cli.json ./&#10;COPY src ./src&#10;RUN npm run build&#10;&#10;FROM node:20-alpine AS runner&#10;WORKDIR /app&#10;ENV NODE_ENV=production&#10;# Copiar solo lo necesario&#10;COPY --from=deps /app/node_modules ./node_modules&#10;COPY package*.json ./&#10;COPY --from=build /app/dist ./dist&#10;EXPOSE 3000&#10;CMD [&quot;node&quot;, &quot;dist/main.js&quot;]&#10;" />
+              <option name="updatedContent" value="# Backend (NestJS) multi-stage&#10;FROM node:20-alpine AS deps&#10;WORKDIR /app&#10;# Dependencias de compilación necesarias para argon2 y otros módulos nativos&#10;RUN apk add --no-cache --virtual .build-deps python3 make g++&#10;COPY package*.json ./&#10;# Usar npm ci si existe lock para builds reproducibles&#10;RUN if [ -f package-lock.json ]; then npm ci --omit=optional; else npm install --omit=optional; fi&#10;&#10;FROM deps AS build&#10;COPY tsconfig*.json nest-cli.json ./&#10;COPY src ./src&#10;RUN npm run build&#10;&#10;# Instalar solo dependencias de producción para la imagen final&#10;FROM node:20-alpine AS prod-deps&#10;WORKDIR /app&#10;COPY package*.json ./&#10;RUN if [ -f package-lock.json ]; then npm ci --omit=dev --omit=optional; else npm install --omit=dev --omit=optional; fi&#10;&#10;FROM node:20-alpine AS runner&#10;WORKDIR /app&#10;ENV NODE_ENV=production&#10;# Copiar solo las dependencias de producción y el código compilado&#10;COPY --from=prod-deps /app/node_modules ./node_modules&#10;COPY package*.json ./&#10;COPY --from=build /app/dist ./dist&#10;# Eliminar dependencias de compilación (no instaladas en esta capa) por limpieza defensiva&#10;RUN rm -rf /var/cache/apk/*&#10;EXPOSE 3000&#10;CMD [&quot;node&quot;, &quot;dist/main.js&quot;]" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

@@ -1,9 +1,12 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../database/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
+import { MailerService } from '../mailer/mailer.service';
+import { ConfigService } from '@nestjs/config';
+import { randomBytes } from 'crypto';
 
 interface JwtPayload {
   sub: number;
@@ -16,6 +19,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly usersRepo: Repository<User>,
     private readonly jwt: JwtService,
+    private readonly mailer: MailerService,
+    private readonly config: ConfigService,
   ) {}
 
   private signToken(user: User) {
@@ -23,16 +28,33 @@ export class AuthService {
     return this.jwt.sign(payload);
   }
 
+  private generateVerificationToken(): string {
+    return randomBytes(32).toString('hex');
+  }
+
   async register(email: string, password: string, name: string) {
     const exists = await this.usersRepo.findOne({ where: { email } });
     if (exists) throw new ConflictException('Email ya está registrado');
 
     const passwordHash = await argon2.hash(password);
-    const user = this.usersRepo.create({ email, name, passwordHash });
+    const token = this.generateVerificationToken();
+    const user = this.usersRepo.create({
+      email,
+      name,
+      passwordHash,
+      isEmailVerified: false,
+      emailVerificationToken: token,
+      emailVerificationSentAt: new Date(),
+    });
     await this.usersRepo.save(user);
 
-    const accessToken = this.signToken(user);
-    return { user: { id: user.id, email: user.email, name: user.name }, accessToken };
+    // Enviar email (ignorar silenciosamente si no configurado)
+    await this.mailer.sendVerificationEmail(user.email, token);
+
+    return {
+      message: 'Usuario creado. Revisa tu correo para verificar la cuenta.',
+      user: { id: user.id, email: user.email, name: user.name, isEmailVerified: user.isEmailVerified },
+    };
   }
 
   async login(email: string, password: string) {
@@ -40,8 +62,30 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Credenciales inválidas');
     const ok = await argon2.verify(user.passwordHash, password);
     if (!ok) throw new UnauthorizedException('Credenciales inválidas');
+    if (!user.isEmailVerified) throw new UnauthorizedException('Email no verificado');
     const accessToken = this.signToken(user);
     return { user: { id: user.id, email: user.email, name: user.name }, accessToken };
   }
-}
 
+  async verifyEmail(token: string) {
+    if (!token) throw new BadRequestException('Token requerido');
+    const user = await this.usersRepo.findOne({ where: { emailVerificationToken: token } });
+    if (!user) throw new BadRequestException('Token inválido');
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    await this.usersRepo.save(user);
+    return { message: 'Email verificado correctamente' };
+  }
+
+  async resendVerification(email: string) {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (user.isEmailVerified) throw new BadRequestException('Email ya verificado');
+    const token = this.generateVerificationToken();
+    user.emailVerificationToken = token;
+    user.emailVerificationSentAt = new Date();
+    await this.usersRepo.save(user);
+    await this.mailer.sendVerificationEmail(user.email, token);
+    return { message: 'Correo de verificación reenviado' };
+  }
+}

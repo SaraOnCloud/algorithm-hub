@@ -7,11 +7,18 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  // Campo opcional si backend lo incluye
+  isEmailVerified?: boolean;
 }
 
 export interface AuthResponse {
   user: User;
   accessToken: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: User;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -46,10 +53,8 @@ export class AuthService {
     this.userSubject.next(null);
   }
 
-  register(payload: { email: string; password: string; name: string }): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${environment.apiBaseUrl}/auth/register`, payload)
-      .pipe(tap((resp) => this.setSession(resp)));
+  register(payload: { email: string; password: string; name: string }) {
+    return this.http.post<RegisterResponse>(`${environment.apiBaseUrl}/auth/register`, payload);
   }
 
   login(payload: { email: string; password: string }): Observable<AuthResponse> {

@@ -29,7 +29,14 @@ import { Router, RouterLink } from '@angular/router';
             <p class="text-sm text-gray-600 dark:text-gray-400">Fill in your details to begin</p>
           </div>
 
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+          @if (successMessage) {
+            <div class="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 mb-5">
+              {{ successMessage }}<br />
+              <span class="block mt-2">You can close this tab after verifying, then <a routerLink="/auth/login" class="underline font-medium">sign in</a>.</span>
+            </div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4" *ngIf="!successMessage">
              <div>
                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full name</label>
                <input
@@ -115,6 +122,7 @@ export class RegisterComponent {
 
   loading = false;
   error = '';
+  successMessage = '';
   features = [
     'Full access to visualizations',
     'Progress tracking',
@@ -129,19 +137,20 @@ export class RegisterComponent {
 
   onSubmit() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loading = true;
-    this.error = '';
-    this.auth
-      .register(this.form.getRawValue() as any)
-      .subscribe({
-        next: () => this.router.navigate(['/progress']),
-        error: (err) => {
-          const status = err?.status;
-          if (status === 404) this.error = 'Service unavailable. Ensure backend is running at http://localhost:3000/api/v1.';
-          else if (status === 409) this.error = 'This email is already registered.';
-          else this.error = err?.error?.message || 'Registration error';
-          this.loading = false;
-        },
-      });
+    this.loading = true; this.error = '';
+    this.auth.register(this.form.getRawValue() as any).subscribe({
+      next: (resp) => {
+        this.successMessage = resp.message || 'Account created. Check your inbox to verify your email.';
+        this.loading = false;
+        this.form.disable();
+      },
+      error: (err) => {
+        const status = err?.status;
+        if (status === 404) this.error = 'Service unavailable.';
+        else if (status === 409) this.error = 'This email is already registered.';
+        else this.error = err?.error?.message || 'Registration error';
+        this.loading = false;
+      }
+    });
   }
 }

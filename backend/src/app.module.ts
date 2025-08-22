@@ -10,6 +10,9 @@ import { UserAlgorithm } from './database/entities/user-algorithm.entity';
 import { AuthModule } from './modules/auth/auth.module';
 import { AlgorithmsModule } from './modules/algorithms/algorithms.module';
 import { ProgressModule } from './modules/progress/progress.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { MailerModule } from './modules/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -25,8 +28,20 @@ import { ProgressModule } from './modules/progress/progress.module';
         DB_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().min(16).required(),
         JWT_EXPIRES_IN: Joi.string().default('1h'),
+        // Email (opcionales, si faltan no se enviarán correos)
+        EMAIL_FROM: Joi.string().email().optional(),
+        EMAIL_FROM_NAME: Joi.string().optional(),
+        EMAIL_USER: Joi.string().email().optional(),
+        EMAIL_PASS: Joi.string().optional(),
+        DOMAIN: Joi.string().optional(),
       }),
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60, // ventana 60s
+        limit: 100, // límite global
+      },
+    ]),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -45,8 +60,12 @@ import { ProgressModule } from './modules/progress/progress.module';
     AuthModule,
     AlgorithmsModule,
     ProgressModule,
+    MailerModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard }, // rate limiting global
+  ],
 })
 export class AppModule {}

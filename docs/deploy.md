@@ -1,79 +1,100 @@
 # Despliegue (Docker Compose)
 
 Objetivo
-Levantar MariaDB, backend (NestJS) y frontend (Angular) con Docker Compose.
+Levantar MariaDB, backend (NestJS), frontend (Angular) y reverse proxy Traefik con HTTPS automático (Let's Encrypt).
 
 Requisitos
 - Docker Desktop actualizado
-- Variables de entorno en backend/.env
+- Archivo backend/.env con variables de DB y JWT
+- Archivo .env (en la raíz) con DOMAIN y LE_EMAIL
+  - DOMAIN=midominio.com (sin protocolo)
+  - LE_EMAIL=correo@midominio.com (email válido para certificados)
+  - DNS: crear registros A:
+    - midominio.com -> IP del servidor
+    - api.midominio.com -> IP del servidor
 
-docker-compose.yml (ejemplo)
-version: "3.9"
+## docker-compose.yml (resumen relevante)
+```yaml
 services:
-  db:
-    image: mariadb:10.6
-    environment:
-      MARIADB_DATABASE: algorithm_hub
-      MARIADB_USER: algouser
-      MARIADB_PASSWORD: algopass
-      MARIADB_ROOT_PASSWORD: rootpass
-    ports:
-      - "3306:3306"
+  traefik:
+    image: traefik:v3.0
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+    ports: ["80:80", "443:443"]
     volumes:
-      - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
 
   backend:
-    build: ./backend
-    env_file:
-      - ./backend/.env
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: algouser
-      DB_PASSWORD: algopass
-      DB_NAME: algorithm_hub
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - "3000:3000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backend.rule=Host(`api.${DOMAIN}`)
+      - traefik.http.routers.backend.entrypoints=websecure
+      - traefik.http.routers.backend.tls.certresolver=letsencrypt
+      - traefik.http.services.backend.loadbalancer.server.port=3000
 
   frontend:
-    build: ./frontend
-    environment:
-      - NODE_OPTIONS=--openssl-legacy-provider
-    ports:
-      - "4200:80"
-    depends_on:
-      - backend
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.frontend.entrypoints=websecure
+      - traefik.http.routers.frontend.tls.certresolver=letsencrypt
+      - traefik.http.services.frontend.loadbalancer.server.port=80
+```
 
-volumes:
-  db_data:
+## Pasos
+1) Preparar backend/.env con DB_HOST=db, credenciales, JWT_SECRET, etc.
+2) Crear .env en la raíz copiando .env.example y ajustando DOMAIN y LE_EMAIL.
+3) Configurar DNS (A records) hacia la IP pública antes de levantar contenedores.
+4) (Opcional pruebas) Activar CA de staging de Let's Encrypt descomentando la línea caserver en servicio traefik para evitar rate limits.
+5) Levantar servicios:
+```
+Docker compose up -d --build
+```
+6) Ver logs de Traefik y confirmar emisión de certificados:
+```
+Docker compose logs -f traefik
+```
+7) Acceder:
+- Web: https://DOMAIN
+- API: https://api.DOMAIN (añadir /api/v1 según rutas)
+8) Ejecutar migraciones / seed si procede:
+```
+Docker compose exec backend npm run typeorm:migration:run
+Docker compose exec backend npm run seed:run
+```
 
-Pasos
-1) Preparar backend/.env con JWT_SECRET y DB_* (ver docs/setup-local.md)
-2) Construir e iniciar
-- docker compose up -d --build
-3) Ejecutar migraciones y seed (si no están automatizadas en entrypoint)
-- docker compose exec backend npm run typeorm:migration:run
-- docker compose exec backend npm run seed:run
-4) Acceder
-- API: http://localhost:3000/api/v1
-- Web: http://localhost:4200
+## Producción (hardening adicional)
+- Activar middleware de cabeceras (ya incluido: HSTS, XSS filter, etc.).
+- Añadir rate limiting (Traefik plugin o a nivel app / CDN).
+- Forzar HTTPS (ya redirección automática configurada).
+- Implementar backups de volumen db_data y cifrado en reposo según infraestructura.
+- Usar staging para validar primera vez, luego volver a producción (eliminar caserver).
 
-Producción
-- Usar imágenes multi-stage para backend y frontend (Nginx para servir Angular)
-- Añadir reverse proxy (Nginx/Caddy) con HTTPS (Let's Encrypt)
-- Configurar variables de entorno seguras y secretos (docker secrets)
-- Habilitar logs y metrics (por ejemplo, a stdout + stack ELK/EFK)
+## Troubleshooting
+- Certificado no emitido: comprobar DNS propagado y que puertos 80/443 estén abiertos.
+- 404 desde dominio: revisar labels y variable DOMAIN cargada (docker compose config | grep DOMAIN).
+- Renovación: automática (ACME). No tocar acme.json.
+- Rate limit: usar entorno de staging temporalmente.
 
-Troubleshooting
-- db no saludable: revisar logs con docker compose logs db
-- backend no arranca: validar variables y conectividad a db
-- puertos en uso: ajustar mapeos en compose
+## Comandos útiles
+```
+Docker compose ps
+Docker compose logs -f traefik
+Docker compose exec backend curl -I http://localhost:3000/api/v1/algorithms
+Docker compose config
+```
 
+## Variables clave
+- DOMAIN: dominio raíz (sin protocolo)
+- LE_EMAIL: email para ACME
+- JWT_SECRET / JWT_EXPIRES_IN: backend
+- DB_*: credenciales DB

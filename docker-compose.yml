@@ -15,6 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5
@@ -27,31 +29,106 @@ services:
       - db
     ports:
       - "8087:80"
+    networks:
+      - internal
 
-#  backend:
-#    build: ./backend
-#    env_file:
-#      - ./backend/.env
-#    environment:
-#      DB_HOST: db
-#      DB_PORT: 3306
-#      DB_USER: algouser
-#      DB_PASSWORD: algopass
-#      DB_NAME: algorithm_hub
-#    depends_on:
-#      db:
-#        condition: service_healthy
-#    ports:
-#      - "3000:3000"
-#
-#  frontend:
-#    build: ./frontend
-#    environment:
-#      - NODE_OPTIONS=--openssl-legacy-provider
-#    ports:
-#      - "4200:80"
-#    depends_on:
-#      - backend
+  backend:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: algouser
+      DB_PASSWORD: algopass
+      DB_NAME: algorithm_hub
+    depends_on:
+      db:
+        condition: service_healthy
+    # Puerto interno; Traefik hará el proxy. Descomenta para acceso directo local.
+    # ports:
+    #   - "3000:3000"
+    networks:
+      - internal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.middlewares=secHeaders@docker"
+      - "traefik.docker.network=traefik"
+
+  frontend:
+    build: ./frontend
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+    # ports:
+    #   - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - internal
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.middlewares=secHeaders@docker"
+      - "traefik.docker.network=traefik"
+
+  traefik:
+    image: traefik:v3.0
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      # Descomenta para usar el entorno de staging de Let's Encrypt y evitar rate limits al probar:
+      # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--accesslog=true"
+      - "--log.level=INFO"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    networks:
+      - traefik
+      - internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      # Middleware de cabeceras seguras reutilizable
+      - "traefik.http.middlewares.secHeaders.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.secHeaders.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.secHeaders.headers.stsPreload=true"
+      - "traefik.http.middlewares.secHeaders.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.secHeaders.headers.referrerPolicy=no-referrer"
+      - "traefik.http.middlewares.secHeaders.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.secHeaders.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.secHeaders.headers.frameDeny=true"
+
+networks:
+  traefik:
+    driver: bridge
+  internal:
+    driver: bridge
 
 volumes:
   db_data:
+  traefik_letsencrypt:

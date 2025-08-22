@@ -36,7 +36,9 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
     "mysql2": "^3.11.3",
-    "joi": "^17.13.3"
+    "joi": "^17.13.3",
+    "nodemailer": "^6.9.13",
+    "@nestjs/throttler": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

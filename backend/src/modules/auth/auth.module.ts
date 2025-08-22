@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../../database/entities/user.entity';
 import { JwtStrategy } from './jwt.strategy';
+import { MailerModule } from '../mailer/mailer.module';
 
 @Module({
   imports: [
@@ -20,10 +21,10 @@ import { JwtStrategy } from './jwt.strategy';
         signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN') || '1h' },
       }),
     }),
+    MailerModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
-

@@ -6,6 +6,7 @@ Contenido clave
 - Stack: Angular 17+, NestJS 10+, TypeScript, TypeORM, MariaDB 10.6+, JWT, ESLint, Prettier.
 - Arquitectura: monorepo simple con carpetas frontend/ y backend/ y docs/.
 - Calidad: Clean Code, SOLID, pruebas unitarias y e2e, CI/CD sugerido con GitHub Actions.
+- Despliegue: Docker Compose + Traefik (HTTPS automático Let's Encrypt).
 
 Estructura del repositorio
 - frontend/ Aplicación Angular
@@ -40,6 +41,13 @@ Configuración rápida (local)
 - Backend: npm run start:dev
 - Frontend: npm start
 
+Despliegue con HTTPS (resumen)
+- Copiar .env.example a .env y definir DOMAIN y LE_EMAIL.
+- Configurar DNS: DOMAIN y api.DOMAIN apuntando a la IP del servidor.
+- docker compose up -d --build
+- Acceder: https://DOMAIN y https://api.DOMAIN
+- Ver más detalles/hardening en docs/deploy.md y docs/security.md.
+
 Características
 - Registro e inicio de sesión con JWT
 - Listado y detalle de 20 algoritmos predefinidos
@@ -52,7 +60,7 @@ Documentación
 - docs/db.md Esquema de datos y entidades
 - docs/algorithms.md Lista de 20 algoritmos
 - docs/setup-local.md Guía detallada de instalación en macOS
-- docs/deploy.md Despliegue con Docker Compose
+- docs/deploy.md Despliegue con Docker Compose + Traefik/HTTPS
 - docs/coding-standards.md Estándares de código (Clean Code)
 - docs/contributing.md Flujo de contribución y calidad
 - docs/security.md Consideraciones de seguridad
@@ -64,4 +72,3 @@ Buenas prácticas
 
 Licencia
 - MIT (sugerida)
-

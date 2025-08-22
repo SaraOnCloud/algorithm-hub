@@ -34,7 +34,7 @@ export class AuthService {
 
   async register(email: string, password: string, name: string) {
     const exists = await this.usersRepo.findOne({ where: { email } });
-    if (exists) throw new ConflictException('Email ya está registrado');
+    if (exists) throw new ConflictException('Email is already registered');
 
     const passwordHash = await argon2.hash(password);
     const token = this.generateVerificationToken();
@@ -48,44 +48,44 @@ export class AuthService {
     });
     await this.usersRepo.save(user);
 
-    // Enviar email (ignorar silenciosamente si no configurado)
+    // Send verification email (silent if disabled)
     await this.mailer.sendVerificationEmail(user.email, token);
 
     return {
-      message: 'Usuario creado. Revisa tu correo para verificar la cuenta.',
+      message: 'Account created. Check your inbox to verify your email.',
       user: { id: user.id, email: user.email, name: user.name, isEmailVerified: user.isEmailVerified },
     };
   }
 
   async login(email: string, password: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
-    if (!user) throw new UnauthorizedException('Credenciales inválidas');
+    if (!user) throw new UnauthorizedException('Invalid credentials');
     const ok = await argon2.verify(user.passwordHash, password);
-    if (!ok) throw new UnauthorizedException('Credenciales inválidas');
-    if (!user.isEmailVerified) throw new UnauthorizedException('Email no verificado');
+    if (!ok) throw new UnauthorizedException('Invalid credentials');
+    if (!user.isEmailVerified) throw new UnauthorizedException('Email not verified');
     const accessToken = this.signToken(user);
     return { user: { id: user.id, email: user.email, name: user.name }, accessToken };
   }
 
   async verifyEmail(token: string) {
-    if (!token) throw new BadRequestException('Token requerido');
+    if (!token) throw new BadRequestException('Token is required');
     const user = await this.usersRepo.findOne({ where: { emailVerificationToken: token } });
-    if (!user) throw new BadRequestException('Token inválido');
+    if (!user) throw new BadRequestException('Invalid token');
     user.isEmailVerified = true;
     user.emailVerificationToken = null;
     await this.usersRepo.save(user);
-    return { message: 'Email verificado correctamente' };
+    return { message: 'Email verified successfully' };
   }
 
   async resendVerification(email: string) {
     const user = await this.usersRepo.findOne({ where: { email } });
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    if (user.isEmailVerified) throw new BadRequestException('Email ya verificado');
+    if (!user) throw new NotFoundException('User not found');
+    if (user.isEmailVerified) throw new BadRequestException('Email already verified');
     const token = this.generateVerificationToken();
     user.emailVerificationToken = token;
     user.emailVerificationSentAt = new Date();
     await this.usersRepo.save(user);
     await this.mailer.sendVerificationEmail(user.email, token);
-    return { message: 'Correo de verificación reenviado' };
+    return { message: 'Verification email resent' };
   }
 }

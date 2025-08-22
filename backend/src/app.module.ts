@@ -28,7 +28,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
         DB_NAME: Joi.string().required(),
         JWT_SECRET: Joi.string().min(16).required(),
         JWT_EXPIRES_IN: Joi.string().default('1h'),
-        // Email (opcionales, si faltan no se enviarán correos)
+        // Email (optional; if missing, emails are disabled)
         EMAIL_FROM: Joi.string().email().optional(),
         EMAIL_FROM_NAME: Joi.string().optional(),
         EMAIL_USER: Joi.string().email().optional(),
@@ -38,8 +38,8 @@ import { MailerModule } from './modules/mailer/mailer.module';
     }),
     ThrottlerModule.forRoot([
       {
-        ttl: 60, // ventana 60s
-        limit: 100, // límite global
+        ttl: 60, // 60s window
+        limit: 100, // global rate limit
       },
     ]),
     TypeOrmModule.forRootAsync({
@@ -52,7 +52,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [User, Algorithm, UserAlgorithm],
-        synchronize: true, // Nota: usar migraciones en prod
+        synchronize: true, // NOTE: use proper migrations in production
         logging: config.get<string>('NODE_ENV') !== 'production',
       }),
     }),
@@ -65,7 +65,7 @@ import { MailerModule } from './modules/mailer/mailer.module';
   controllers: [AppController],
   providers: [
     AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard }, // rate limiting global
+    { provide: APP_GUARD, useClass: ThrottlerGuard }, // global rate limiting
   ],
 })
 export class AppModule {}

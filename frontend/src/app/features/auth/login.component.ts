@@ -9,10 +9,10 @@ import { Router, RouterLink } from '@angular/router';
   selector: 'app-login',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   template: `
-    <section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary-50/50 to-white dark:from-gray-950 dark:to-gray-900 py-10 px-4">
+    <section class="min-h-screen flex items-center justify-center py-10 px-4">
       <div class="w-full max-w-5xl grid md:grid-cols-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-card bg-white dark:bg-gray-900">
         <!-- Left panel / illustration -->
-        <div class="hidden md:flex flex-col justify-center gap-4 p-10 bg-gradient-to-br from-primary-600 to-primary-400 text-white">
+        <div class="hidden md:flex flex-col justify-center gap-4 p-10 bg-[#030e29] text-white">
             <h2 class="text-3xl font-bold text-white leading-tight">Algorithm Hub</h2>
             <p class="text-white/90">Learn, visualize and practice algorithms with interactive experiences.</p>
             <ul class="space-y-2 text-white/90 text-sm">

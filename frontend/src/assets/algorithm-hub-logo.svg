@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 220" role="img" aria-labelledby="title desc">
+  <title id="title">Algorithm Hub — logo</title>
+  <desc id="desc">Icon of a connected graph with a play symbol, plus the wordmark “Algorithm Hub”.</desc>
+
+  <defs>
+    <linearGradient id="g-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+
+    <!-- Reusable node dot -->
+    <circle id="node" r="8" fill="white" stroke="url(#g-accent)" stroke-width="3"/>
+  </defs>
+
+  <!-- ICON -->
+  <g transform="translate(36,20)">
+    <!-- Card -->
+    <rect x="0" y="0" width="180" height="180" rx="28" fill="#0f172a" filter="url(#soft-shadow)"/>
+
+    <!-- Graph edges -->
+    <g stroke="url(#g-accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+      <!-- perimeter -->
+      <path d="M40 40 L120 34 L150 66 L134 138 L62 144 L32 92 Z"/>
+      <!-- cross links -->
+      <path d="M120 34 L62 144"/>
+      <path d="M40 40 L134 138"/>
+      <path d="M150 66 L32 92"/>
+    </g>
+
+    <!-- Nodes -->
+    <g>
+      <use href="#node" x="40"  y="40"/>
+      <use href="#node" x="120" y="34"/>
+      <use href="#node" x="150" y="66"/>
+      <use href="#node" x="134" y="138"/>
+      <use href="#node" x="62"  y="144"/>
+      <use href="#node" x="32"  y="92"/>
+    </g>
+
+    <!-- Play / demo symbol -->
+    <g transform="translate(88,90)">
+      <circle r="20" fill="white" opacity="0.95"/>
+      <path d="M-6 -10 L14 0 L-6 10 Z" fill="url(#g-accent)"/>
+    </g>
+  </g>
+
+  <!-- WORDMARK -->
+  <g transform="translate(240,56)">
+    <text x="0" y="0" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif"
+          font-weight="800" font-size="48" fill="#0b1221">Algorithm</text>
+    <text x="0" y="58" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif"
+          font-weight="700" font-size="48" fill="url(#g-accent)">Hub</text>
+
+    <!-- Baseline tagline (optional, delete if not needed) -->
+    <text x="0" y="98" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif"
+          font-size="16" fill="#475569" letter-spacing="0.5">Learn algorithms with interactive demos</text>
+  </g>
+</svg>

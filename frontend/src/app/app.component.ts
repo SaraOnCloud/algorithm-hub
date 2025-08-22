@@ -13,5 +13,8 @@ import { AuthService } from './core/auth/auth.service';
 export class AppComponent {
   private auth = inject(AuthService);
   user$ = this.auth.user$;
-  logout() { this.auth.logout(); }
+  mobileMenuOpen = false;
+  toggleMobileMenu() { this.mobileMenuOpen = !this.mobileMenuOpen; }
+  closeMobileMenu() { this.mobileMenuOpen = false; }
+  logout() { this.auth.logout(); this.closeMobileMenu(); }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlgorithmsService, Algorithm, PagedResult } from '../../core/algorithms/algorithms.service';
 import { FormsModule } from '@angular/forms';
@@ -6,6 +6,7 @@ import { RouterLink } from '@angular/router';
 import { ProgressService } from '../../core/progress/progress.service';
 import { AuthService } from '../../core/auth/auth.service';
 import { map } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -14,13 +15,9 @@ import { map } from 'rxjs/operators';
   template: `
     <div class="space-y-8">
       <!-- Header Section -->
-      <div class="text-center space-y-4">
-        <h1 class="text-4xl font-bold text-gray-900 bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
-          🧠 Programming Algorithms
-        </h1>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-          Explore and learn the most important algorithms in computer science
-        </p>
+      <div class="text-center space-y-6">
+        <img src="assets/algorithm-hub-logo.svg" alt="Algorithm Hub logo" class="mx-auto h-43 w-auto drop-shadow-sm select-none hidden sm:block" loading="lazy" />
+        <img src="assets/algorithm-hub-logo.svg" alt="Algorithm Hub logo" class="mx-auto h-30 w-auto drop-shadow-sm select-none sm:hidden" loading="lazy" />
       </div>
 
       <!-- Filters Section -->
@@ -165,6 +162,8 @@ export class AlgorithmsListComponent implements OnInit {
   private algos = inject(AlgorithmsService);
   protected progress = inject(ProgressService);
   protected auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   items: Algorithm[] = [];
   total = 0;
@@ -175,10 +174,18 @@ export class AlgorithmsListComponent implements OnInit {
   loading = false;
   toggling: string | null = null;
   learnedSlugs = new Set<string>();
+  private adjustingPage = false; // evita bucles al corregir página fuera de rango
 
   get totalPages() { return Math.max(1, Math.ceil(this.total / this.pageSize)); }
 
   ngOnInit() {
+    // Lee estado inicial desde query params
+    const qp = this.route.snapshot.queryParamMap;
+    const qpPage = parseInt(qp.get('page') || '1', 10);
+    this.page = isNaN(qpPage) || qpPage < 1 ? 1 : qpPage;
+    this.search = qp.get('search') || '';
+    this.category = qp.get('category') || '';
+
     if (this.auth.isAuthenticated) {
       this.progress.getLearned().subscribe((res) => (this.learnedSlugs = res.slugs));
     }
@@ -188,17 +195,62 @@ export class AlgorithmsListComponent implements OnInit {
   isLearned(slug: string) { return this.learnedSlugs.has(slug); }
 
   refresh() {
+    // Sincroniza query params antes de la llamada (excepto cuando estamos ajustando internamente)
+    if (!this.adjustingPage) {
+      this.updateQueryParams();
+    }
     this.loading = true;
-    this.algos.list({ search: this.search, category: this.category || undefined, page: this.page, pageSize: this.pageSize }).subscribe({
-      next: (res: PagedResult<Algorithm>) => {
-        this.items = res.items; this.total = res.total; this.page = res.page; this.pageSize = res.pageSize; this.loading = false;
+    this.algos
+      .list({ search: this.search, category: this.category || undefined, page: this.page, pageSize: this.pageSize })
+      .subscribe({
+        next: (res: PagedResult<Algorithm>) => {
+          this.items = res.items;
+          this.total = res.total;
+          this.page = res.page; // backend podría normalizar
+          this.pageSize = res.pageSize;
+          this.loading = false;
+          // Si la página actual excede las páginas totales (p.ej. se cambió filtro y quedó vacía), ajusta y vuelve a cargar una vez.
+          const totalPagesNow = this.totalPages;
+          if (this.page > totalPagesNow) {
+            this.adjustingPage = true;
+            this.page = totalPagesNow;
+            // Si totalPagesNow es 0, lo normalizamos a 1 para mantener coherencia visual
+            if (this.page < 1) this.page = 1;
+            this.refresh();
+            this.adjustingPage = false;
+          }
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
+  }
+
+  private updateQueryParams() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        page: this.page && this.page !== 1 ? this.page : null, // omite página 1 para URLs limpias
+        search: this.search || null,
+        category: this.category || null,
       },
-      error: () => { this.loading = false; },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
-  prev() { if (this.page > 1) { this.page--; this.refresh(); } }
-  next() { if (this.page < this.totalPages) { this.page++; this.refresh(); } }
+  prev() {
+    if (this.page > 1) {
+      this.page--;
+      this.refresh();
+    }
+  }
+  next() {
+    if (this.page < this.totalPages) {
+      this.page++;
+      this.refresh();
+    }
+  }
 
   toggle(a: Algorithm) {
     if (!this.auth.isAuthenticated) return;

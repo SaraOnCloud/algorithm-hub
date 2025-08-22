@@ -32,8 +32,13 @@ export class MailerService {
     const fromEmail = this.config.get<string>('EMAIL_FROM') || this.config.get<string>('EMAIL_USER') || 'no-reply@example.com';
     const fromName = this.config.get<string>('EMAIL_FROM_NAME');
     const from = fromName ? `${fromName} <${fromEmail}>` : fromEmail;
+    const nodeEnv = this.config.get<string>('NODE_ENV');
     const domain = this.domain || 'localhost';
-    const verifyUrl = `https://api.${domain}/auth/verify?token=${encodeURIComponent(token)}`;
+    // Base URL acorde al nuevo esquema: mismo dominio + prefijo /api/v1
+    const baseUrl = domain === 'localhost'
+      ? 'http://localhost:3000' // acceso directo local al backend
+      : `https://${domain}`;
+    const verifyUrl = `${baseUrl}/api/v1/auth/verify?token=${encodeURIComponent(token)}`;
 
     const html = `<p>Confirma tu cuenta haciendo clic:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p><p>Si no creaste esta cuenta ignora este correo.</p>`;
 

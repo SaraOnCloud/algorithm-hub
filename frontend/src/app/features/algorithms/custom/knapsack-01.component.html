@@ -1,20 +1,36 @@
 <a routerLink="/algorithms" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors group">
   <span class="group-hover:-translate-x-0.5 transition-transform">←</span>
-  Volver
+  Back
 </a>
 
-<ui-card title="0/1 Knapsack" subtitle="dp · medium">
+<ui-card title="0/1 Knapsack" subtitle="dynamic programming · medium">
   <div class="ah-knap space-y-6">
     <!-- Intro -->
     <div class="prose max-w-none">
-      <p class="text-gray-600">Explora paso a paso cómo la programación dinámica resuelve el problema de la mochila 0/1. Ajusta la capacidad, edita los ítems y mira cómo se llena la tabla.</p>
+      <p class="text-gray-600">
+        Step through how dynamic programming solves the classic <strong>0/1 knapsack</strong> problem:
+        given a set of items with <em>weight</em> and <em>value</em> and a maximum capacity, we want to maximize total value without exceeding capacity.
+      </p>
+      <p class="text-gray-600">
+        We define <code>dp[i][w]</code> as the <strong>maximum achievable value</strong> using only the first <code>i</code> items (indices 1..i) with exactly <code>w</code> capacity available. We fill row by row (items) and column by column (capacity).
+      </p>
+      <ul class="text-gray-600">
+        <li><strong>Base cases:</strong> row 0 or capacity 0 ⇒ value 0.</li>
+        <li><strong>Choice:</strong> for the current item we can <em>exclude</em> it (keep previous value) or <em>include</em> it if it fits (item value + best for remaining capacity).</li>
+        <li><strong>Transition:</strong> <code>dp[i][w] = max( dp[i-1][w], value[i] + dp[i-1][w - weight[i]] )</code> if <code>weight[i] ≤ w</code>, otherwise <code>dp[i][w] = dp[i-1][w]</code>.</li>
+        <li><strong>Complexity:</strong> O(n · W) time and O(n · W) space (can be optimized to O(W) with a 1D array iterating capacities in reverse).</li>
+        <li><strong>Reconstruction:</strong> from <code>dp[n][W]</code> go backwards: if <code>dp[i][w] != dp[i-1][w]</code>, item i was taken; subtract its weight from w.</li>
+      </ul>
+      <p class="text-gray-600">
+        Adjust capacity, edit items or generate a random set and watch the table fill. Use "Step" to advance manually or "Play" to animate the process.
+      </p>
     </div>
 
-    <!-- Controles principales -->
+    <!-- Controls -->
     <div class="flex flex-col lg:flex-row gap-4 lg:items-end">
       <div class="flex-1 bg-white/70 dark:bg-slate-800/70 backdrop-blur rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <label class="flex items-center justify-between mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-          <span>Capacidad de la mochila</span>
+          <span>Knapsack capacity</span>
           <span class="inline-flex items-center gap-1 text-slate-900 dark:text-white"><span class="font-semibold">{{ capacity }}</span>/<span class="text-slate-500">{{ maxCapacity }}</span></span>
         </label>
         <div class="flex items-center gap-3">
@@ -25,29 +41,29 @@
 
       <div class="flex-1 bg-white/70 dark:bg-slate-800/70 backdrop-blur rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
         <label class="flex items-center justify-between mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-          <span>Velocidad</span>
+          <span>Speed</span>
           <span class="text-slate-500">{{ speed }} ms</span>
         </label>
         <div class="flex items-center gap-3">
           <input type="range" class="w-full accent-fuchsia-500" min="200" max="1500" step="50" [(ngModel)]="speed" (ngModelChange)="setSpeed($event)" />
           <select class="ah-input w-28" [(ngModel)]="speed" (ngModelChange)="setSpeed($event)">
-            <option [ngValue]="300">Rápido</option>
+            <option [ngValue]="300">Fast</option>
             <option [ngValue]="700">Normal</option>
-            <option [ngValue]="1200">Lento</option>
+            <option [ngValue]="1200">Slow</option>
           </select>
         </div>
       </div>
 
       <div class="flex-1 flex flex-wrap gap-2">
         <button (click)="toggleAutoplay()" class="ah-btn ah-btn-primary" [ngClass]="{ 'animate-pulse': autoplay }">
-          <span *ngIf="!autoplay">▶ Reproducir</span>
-          <span *ngIf="autoplay">⏸ Pausar</span>
+          <span *ngIf="!autoplay">▶ Play</span>
+          <span *ngIf="autoplay">⏸ Pause</span>
         </button>
-        <button (click)="stepBackward()" class="ah-btn">⟲ Atrás</button>
-        <button (click)="stepForward()" class="ah-btn">⟶ Paso</button>
-        <button (click)="resetTables()" class="ah-btn ah-btn-soft">⟲ Reiniciar</button>
-        <button (click)="randomize()" class="ah-btn ah-btn-soft">🎲 Aleatorio</button>
-        <button (click)="addItem()" class="ah-btn ah-btn-outline">＋ Añadir ítem</button>
+        <button (click)="stepBackward()" class="ah-btn">⟲ Back</button>
+        <button (click)="stepForward()" class="ah-btn">⟶ Step</button>
+        <button (click)="resetTables()" class="ah-btn ah-btn-soft">⟲ Reset</button>
+        <button (click)="randomize()" class="ah-btn ah-btn-soft">🎲 Random</button>
+        <button (click)="addItem()" class="ah-btn ah-btn-outline">＋ Add item</button>
       </div>
     </div>
 
@@ -59,15 +75,15 @@
           <div class="flex-1">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold text-slate-800 dark:text-slate-100">{{ it.name }}</h3>
-              <button class="text-slate-400 hover:text-rose-500 transition-colors" (click)="removeItem(idx)" aria-label="Eliminar">✖</button>
+              <button class="text-slate-400 hover:text-rose-500 transition-colors" (click)="removeItem(idx)" aria-label="Remove">✖</button>
             </div>
             <div class="mt-3 grid grid-cols-2 gap-3 text-sm">
               <label class="flex flex-col gap-1">
-                <span class="text-slate-500">Peso</span>
+                <span class="text-slate-500">Weight</span>
                 <input type="number" class="ah-input" min="1" [(ngModel)]="it.weight" (ngModelChange)="resetTables()" />
               </label>
               <label class="flex flex-col gap-1">
-                <span class="text-slate-500">Valor</span>
+                <span class="text-slate-500">Value</span>
                 <input type="number" class="ah-input" min="1" [(ngModel)]="it.value" (ngModelChange)="resetTables()" />
               </label>
             </div>
@@ -76,11 +92,11 @@
       </div>
     </div>
 
-    <!-- Visualización DP -->
+    <!-- DP Visualization -->
     <div class="dp-wrap">
       <div class="flex items-center justify-between mb-2">
-        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">Tabla de DP (filas: ítems, columnas: capacidad)</h4>
-        <span class="text-xs text-slate-500">Celda actual: (i={{ i }}, w={{ w }})</span>
+        <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-200">DP Table (rows = items, columns = capacity)</h4>
+        <span class="text-xs text-slate-500">Current cell: (i={{ i }}, w={{ w }})</span>
       </div>
       <div class="overflow-auto rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
         <table class="dp-table min-w-max">
@@ -93,8 +109,8 @@
           <tbody>
             <tr *ngFor="let r of [].constructor(items.length + 1); let ri = index">
               <th class="sticky left-0 bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur z-10 text-left">
-                <span *ngIf="ri === 0" class="text-slate-400">0</span>
-                <span *ngIf="ri > 0">{{ items[ri - 1].name }} <span class="text-xs text-slate-400">(p={{ items[ri-1].weight }}, v={{ items[ri-1].value }})</span></span>
+                <span *ngIf="ri === 0" class="text-slate-400">0 (no items)</span>
+                <span *ngIf="ri > 0">{{ items[ri - 1].name }} <span class="text-xs text-slate-400">(w={{ items[ri-1].weight }}, v={{ items[ri-1].value }})</span></span>
               </th>
               <td *ngFor="let c of [].constructor(capacity + 1); let ci = index"
                   [class.cell-current]="ri === i && ci === w && !finished"
@@ -113,34 +129,52 @@
         </table>
       </div>
 
-      <!-- Fórmula/explicación -->
-      <div class="mt-3 text-sm text-slate-600 dark:text-slate-300 flex flex-wrap items-center gap-3">
-        <div class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-          <span class="font-mono">dp[i][w] = max(dp[i-1][w], value[i] + dp[i-1][w - weight[i]])</span>
+      <!-- Formula / explanation -->
+      <div class="mt-3 text-sm text-slate-600 dark:text-slate-300 flex flex-col gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <span class="font-mono">dp[i][w] = max(dp[i-1][w], value[i] + dp[i-1][w - weight[i]])</span>
+          </div>
+          <div *ngIf="i>0" class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+              <span class="text-slate-500">item</span>
+              <span class="font-semibold" [style.color]="items[i-1].color">{{ items[i-1].name }}</span>
+              <span class="text-slate-500">w={{ items[i-1].weight }}, v={{ items[i-1].value }}</span>
+            </span>
+            <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight <= w" class="text-emerald-600">fits</span>
+            <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight > w" class="text-rose-600">doesn't fit</span>
+          </div>
         </div>
-        <div *ngIf="i>0" class="flex items-center gap-2">
-          <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-white/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
-            <span class="text-slate-500">ítem</span>
-            <span class="font-semibold" [style.color]="items[i-1].color">{{ items[i-1].name }}</span>
-            <span class="text-slate-500">p={{ items[i-1].weight }}, v={{ items[i-1].value }}</span>
-          </span>
-          <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight <= w" class="text-emerald-600">incluible</span>
-          <span *ngIf="i>0 && (i-1) < items.length && items[i-1].weight > w" class="text-rose-600">no cabe</span>
+        <div class="leading-snug">
+          <span class="font-semibold">Interpretation:</span>
+          If the weight of item i (current row) is ≤ capacity w (current column), we compare: skipping it (<code>dp[i-1][w]</code>) vs taking it (<code>value[i] + dp[i-1][w - weight[i]]</code>). Choose the maximum. If it doesn't fit, copy the value from above.
+        </div>
+        <div class="leading-snug">
+          <span class="font-semibold">Base cases:</span> first row (0 items) and first column (capacity 0) are 0 because no value can be obtained.
+        </div>
+        <div class="leading-snug">
+          <span class="font-semibold">Filling order:</span> left to right, top to bottom; each cell depends only on the previous row so its dependencies are ready.
+        </div>
+        <div class="leading-snug">
+          <span class="font-semibold">Reconstruction:</span> after filling, recover chosen items by checking if <code>dp[i][w] != dp[i-1][w]</code>; if different, item i was taken and you subtract its weight.
+        </div>
+        <div class="leading-snug">
+          <span class="font-semibold">Optional optimization:</span> you can use a single 1D array iterating capacities downward to save memory, but we keep the full table for visualization clarity.
         </div>
       </div>
     </div>
 
-    <!-- Resultado -->
+    <!-- Result -->
     <div *ngIf="finished" class="mt-2 p-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50/70 dark:bg-emerald-900/20 flex items-start gap-4">
       <div class="text-2xl">✅</div>
       <div class="flex-1">
-        <div class="font-semibold text-emerald-800 dark:text-emerald-300">Solución óptima encontrada</div>
-        <div class="mt-1 text-sm text-emerald-700 dark:text-emerald-200">Valor máximo: <span class="font-bold">{{ dp[items.length][capacity] }}</span></div>
+        <div class="font-semibold text-emerald-800 dark:text-emerald-300">Optimal solution found</div>
+        <div class="mt-1 text-sm text-emerald-700 dark:text-emerald-200">Maximum value: <span class="font-bold">{{ dp[items.length][capacity] }}</span></div>
         <div class="mt-2 flex flex-wrap gap-2">
           <span *ngFor="let idx of solution" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
             <span class="h-2 w-2 rounded-full" [style.background]="items[idx].color"></span>
             <span class="text-sm">{{ items[idx].name }}</span>
-            <span class="text-xs text-slate-500">(p={{ items[idx].weight }}, v={{ items[idx].value }})</span>
+            <span class="text-xs text-slate-500">(w={{ items[idx].weight }}, v={{ items[idx].value }})</span>
           </span>
         </div>
       </div>

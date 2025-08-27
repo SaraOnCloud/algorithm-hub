@@ -30,3 +30,4 @@ export const SEED_ALGORITHMS: SeedAlgorithm[] = [
   { slug: 'activity-selection', name: 'Activity Selection', category: 'greedy', difficulty: 'easy', description: 'Maximum set of pairwise‑compatible activities.' },
   { slug: 'binary-tree-traversals', name: 'Binary Tree Traversals (In/Pre/Post)', category: 'tree', difficulty: 'easy', description: 'Fundamental binary tree traversal orders.' },
 ];
+

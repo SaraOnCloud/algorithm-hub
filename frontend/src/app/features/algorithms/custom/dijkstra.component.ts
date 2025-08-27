@@ -184,7 +184,11 @@ export class DijkstraComponent implements OnDestroy {
   }
   edgeMid(e: EdgeV) {
     const p = this.edgePoints(e);
-    return { mx: (p.x1 + p.x2) / 2, my: (p.y1 + p.y2) / 2 };
+    const t = 1 / 2.3;
+    return {
+      mx: p.x1 + (p.x2 - p.x1) * t,
+      my: p.y1 + (p.y2 - p.y1) * t
+    };
   }
   isCurrentEdge(e: EdgeV) { return this.currentEdge && e.from === this.currentEdge.u && e.to === this.currentEdge.v; }
   isVisited(id: string) { return this.visited.has(id); }

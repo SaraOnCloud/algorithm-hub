@@ -40,10 +40,10 @@ export class Knapsack01Component implements OnInit {
   seedItems() {
     if (this.items.length) return;
     this.items = [
-      { id: 1, name: 'Reloj', weight: 3, value: 6, color: '#06b6d4' },
-      { id: 2, name: 'Libro', weight: 2, value: 4, color: '#f59e0b' },
-      { id: 3, name: 'Cámara', weight: 4, value: 5, color: '#8b5cf6' },
-      { id: 4, name: 'Portátil', weight: 5, value: 8, color: '#22c55e' },
+      { id: 1, name: 'Watch', weight: 3, value: 6, color: '#06b6d4' },
+      { id: 2, name: 'Book', weight: 2, value: 4, color: '#f59e0b' },
+      { id: 3, name: 'Camera', weight: 4, value: 5, color: '#8b5cf6' },
+      { id: 4, name: 'Laptop', weight: 5, value: 8, color: '#22c55e' },
     ];
   }
 

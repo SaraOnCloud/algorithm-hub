@@ -91,7 +91,7 @@ services:
       - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      # Para pruebas sin rate limit descomentar línea siguiente y comentar redirección a producción cuando toque
+      # For testing without rate limit, uncomment the following line and comment out the production redirection when needed
       # - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--accesslog=true"
       - "--log.level=INFO"

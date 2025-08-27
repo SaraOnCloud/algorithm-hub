@@ -1,59 +1,59 @@
-# Seguridad
+# Security
 
-Objetivo
-Definir controles de seguridad para Algorithm Hub (Angular + NestJS, TypeORM, MariaDB) desde el desarrollo hasta producción.
+Objective  
+Define security controls for Algorithm Hub (Angular + NestJS, TypeORM, MariaDB) from development to production.
 
-Autenticación y sesiones
-- JWT (HS256/HS512) con expiración corta (ej. 15–60 min). Campo aud/iss opcional.
-- Almacenamiento del token en frontend: en memoria. Evitar localStorage (riesgo XSS). Opcional cookie HttpOnly+Secure+SameSite=Lax si se configura en backend.
-- Cabecera Authorization: Bearer <token> en todas las peticiones a rutas protegidas.
-- Rotación/Revocación: considerar refresh token en una iteración futura.
+Authentication and Sessions
+- JWT (HS256/HS512) with short expiration (e.g., 15–60 min). Optional aud/iss fields.
+- Token storage on frontend: in memory. Avoid localStorage (XSS risk). Optionally use HttpOnly+Secure+SameSite=Lax cookie if configured in backend.
+- Authorization header: Bearer <token> in all requests to protected routes.
+- Rotation/Revocation: consider refresh token in a future iteration.
 
-Contraseñas
-- Hash con Argon2id (costes ajustados a servidor). No guardar contraseñas en texto plano.
-- Política de contraseñas mínimas (longitud, complejidad razonable) y bloqueo por intentos (rate limit por IP/usuario).
+Passwords
+- Hash with Argon2id (costs adjusted to server). Never store passwords in plain text.
+- Minimum password policy (length, reasonable complexity) and lockout on attempts (rate limit per IP/user).
 
-Validación y saneamiento
-- DTOs con class-validator y class-transformer (whitelist: true, forbidNonWhitelisted: true).
-- Saneamiento de entradas (escape/sanitize) y límites de tamaño en payloads.
+Validation and Sanitization
+- DTOs with class-validator and class-transformer (whitelist: true, forbidNonWhitelisted: true).
+- Input sanitization (escape/sanitize) and payload size limits.
 
-Seguridad HTTP
-- Helmet habilitado (incluye X-Content-Type-Options, X-Frame-Options, etc.).
-- CORS restringido al dominio del frontend y métodos necesarios.
-- Rate limiting y protección básica anti-bruteforce en /auth.
-- HSTS en producción (detrás de HTTPS). Configurar Content-Security-Policy estricta.
+HTTP Security
+- Helmet enabled (includes X-Content-Type-Options, X-Frame-Options, etc.).
+- CORS restricted to frontend domain and necessary methods.
+- Rate limiting and basic anti-bruteforce protection on /auth.
+- HSTS in production (behind HTTPS). Configure strict Content-Security-Policy.
 
-Base de datos
-- Usuario de DB con privilegios mínimos para la app.
-- Constraints y claves únicas (email, slug) para integridad.
-- Queries parametrizadas (TypeORM) para prevenir inyecciones.
-- Backups periódicos y cifrado en reposo (según infraestructura).
+Database
+- DB user with minimum privileges for the app.
+- Constraints and unique keys (email, slug) for integrity.
+- Parameterized queries (TypeORM) to prevent injections.
+- Regular backups and encryption at rest (as per infrastructure).
 
-Gestión de secretos
-- .env fuera del control de versiones. Variables: JWT_SECRET, DB_*.
-- Producción: usar gestor de secretos (AWS Secrets Manager, Vault, etc.). Rotación periódica.
+Secrets Management
+- .env outside version control. Variables: JWT_SECRET, DB_*.
+- Production: use a secrets manager (AWS Secrets Manager, Vault, etc.). Periodic rotation.
 
-Logs y monitoreo
-- Logs estructurados sin PII sensible. Redactar tokens/contraseñas.
-- Trazabilidad con requestId/correlationId.
-- Alertas ante picos de 401/403/5xx y errores de DB.
+Logging and Monitoring
+- Structured logs without sensitive PII. Redact tokens/passwords.
+- Traceability with requestId/correlationId.
+- Alerts on spikes of 401/403/5xx and DB errors.
 
-Dependencias y CI/CD
-- Auditorías periódicas (npm audit, osv-scanner) y actualización continua (Renovate).
-- Escaneo de secretos en PRs, SAST y pruebas e2e en CI.
-- Build inmutable y firmas/verificación de integridad de imágenes de contenedor.
+Dependencies and CI/CD
+- Regular audits (npm audit, osv-scanner) and continuous updates (Renovate).
+- Secret scanning in PRs, SAST, and e2e tests in CI.
+- Immutable build and container image signing/integrity verification.
 
 Frontend
-- Sanitizar entradas en formularios, evitar innerHTML.
-- Uso de Interceptor para añadir Authorization y manejar 401 de forma centralizada.
-- Evitar exponer datos sensibles en consola o mensajes de error.
+- Sanitize form inputs, avoid innerHTML.
+- Use Interceptor to add Authorization and handle 401 centrally.
+- Avoid exposing sensitive data in console or error messages.
 
-Checklist de despliegue
-- [ ] HTTPS habilitado (TLS moderno) y HSTS
-- [ ] CORS restringido
-- [ ] Helmet + CSP configurados
-- [ ] Rate limiting activo
-- [ ] Variables y secretos seguros (no en repo)
-- [ ] Usuario DB con privilegios mínimos
-- [ ] Backups y monitoreo configurados
+Deployment Checklist
+- [ ] HTTPS enabled (modern TLS) and HSTS
+- [ ] CORS restricted
+- [ ] Helmet + CSP configured
+- [ ] Rate limiting active
+- [ ] Secure variables and secrets (not in repo)
+- [ ] DB user with minimum privileges
+- [ ] Backups and monitoring configured
 

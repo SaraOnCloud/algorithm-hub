@@ -1,31 +1,31 @@
-# Setup local en macOS
+# Local Setup on macOS
 
-Prerrequisitos
-- Node.js LTS >= 20 (recomendado via nvm)
-- pnpm >= 9 (o npm)
-- Git y Docker Desktop (opcional para DB)
-- Angular CLI y Nest CLI: npm i -g @angular/cli @nestjs/cli
+Prerequisites
+- Node.js LTS >= 20 (recommended via nvm)
+- pnpm >= 9 (or npm)
+- Git and Docker Desktop (optional for DB)
+- Angular CLI and Nest CLI: npm i -g @angular/cli @nestjs/cli
 
-1) Clonar el repositorio
+1) Clone the repository
 - git clone <url> algorithm-hub
 - cd algorithm-hub
 
-2) Base de datos
-Opción A: Docker (recomendada)
-- Crear archivo docker-compose.db.yml con servicio de MariaDB o usar el de docs/deploy.md
+2) Database
+Option A: Docker (recommended)
+- Create a docker-compose.db.yml file with a MariaDB service or use the one from docs/deploy.md
 - docker compose -f docker-compose.db.yml up -d
-- Variables por defecto: DB_HOST=localhost DB_PORT=3306 DB_USER=algouser DB_PASSWORD=algopass DB_NAME=algorithm_hub
+- Default variables: DB_HOST=localhost DB_PORT=3306 DB_USER=algouser DB_PASSWORD=algopass DB_NAME=algorithm_hub
 
-Opción B: Local nativa
-- Instalar MariaDB (brew install mariadb)
+Option B: Native local
+- Install MariaDB (brew install mariadb)
 - brew services start mariadb
 - mysql -u root
   - CREATE DATABASE algorithm_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   - CREATE USER 'algouser'@'%' IDENTIFIED BY 'algopass';
   - GRANT ALL PRIVILEGES ON algorithm_hub.* TO 'algouser'@'%'; FLUSH PRIVILEGES;
 
-3) Variables de entorno (backend)
-- Crear backend/.env con:
+3) Environment variables (backend)
+- Create backend/.env with:
   DB_HOST=localhost
   DB_PORT=3306
   DB_USER=algouser
@@ -34,25 +34,25 @@ Opción B: Local nativa
   JWT_SECRET=change_me
   JWT_EXPIRES_IN=3600s
 
-4) Instalar dependencias
+4) Install dependencies
 - cd frontend && pnpm i
 - cd ../backend && pnpm i
 
-5) Migraciones y seed
-- Ejecutar migraciones TypeORM (según scripts del backend)
-- Ejecutar seed inicial de 20 algoritmos (script de seeds)
+5) Migrations and seed
+- Run TypeORM migrations (see backend scripts)
+- Run initial seed for 20 algorithms (seed script)
 
-6) Ejecutar en desarrollo
+6) Run in development
 - Backend: pnpm run start:dev (http://localhost:3000/api/v1)
 - Frontend: pnpm start (http://localhost:4200)
 
-7) Probar flujo básico
-- POST /auth/register y /auth/login
+7) Test basic flow
+- POST /auth/register and /auth/login
 - GET /algorithms
-- POST /me/algorithms/:slug/learn y GET /me/progress
+- POST /me/algorithms/:slug/learn and GET /me/progress
 
 Troubleshooting
-- Puertos ocupados: cambiar mapeos en docker-compose o configs CLI
-- Conexión DB: verificar firewall, usuario y privilegios; testear con mysql CLI
-- Migrations: limpiar dist/ y sincronizar versión de TypeORM
+- Ports in use: change mappings in docker-compose or CLI configs
+- DB connection: check firewall, user, and privileges; test with mysql CLI
+- Migrations: clean dist/ and sync TypeORM version
 

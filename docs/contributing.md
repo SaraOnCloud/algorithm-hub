@@ -1,48 +1,49 @@
-# Contribución
+# Contribution
 
-Gracias por tu interés en contribuir a Algorithm Hub. Este documento describe el flujo recomendado para colaborar, estándares y calidad.
+Thank you for your interest in contributing to Algorithm Hub. This document outlines the recommended workflow, standards, and quality guidelines.
 
-Requisitos
-- Node.js >= 20 y pnpm >= 9
-- MariaDB local o vía Docker
-- ESLint + Prettier, Husky configurado
+Requirements
+- Node.js >= 20 and pnpm >= 9
+- Local MariaDB or via Docker
+- ESLint + Prettier, Husky configured
 
-Flujo de trabajo
-1) Fork y branch por feature/fix
-- git checkout -b feat/nombre-corto
-2) Desarrollo
-- Mantén cambios pequeños y atómicos
-- Añade/actualiza pruebas y docs
-3) Lint y pruebas
+Workflow
+1) Fork and create a branch per feature/fix
+- git checkout -b feat/short-name
+2) Development
+- Keep changes small and atomic
+- Add/update tests and docs
+3) Lint and tests
 - pnpm lint && pnpm test
-4) Commits convencionales
-- feat: nueva funcionalidad
-- fix: corrección de bug
+4) Conventional commits
+- feat: new feature
+- fix: bug fix
 - docs:, test:, chore:, refactor:, perf:, ci:
 5) Pull Request
-- Descripción clara, capturas si aplica
-- Checklist: lint ok, tests ok, docs actualizadas
-- Solicita revisión
+- Clear description, screenshots if applicable
+- Checklist: lint ok, tests ok, docs updated
+- Request review
 
-Estándares
-- Ver docs/coding-standards.md
-- TypeScript estricto en frontend y backend
-- DTOs con validación, no exponer entidades directamente
+Standards
+- See docs/coding-standards.md
+- Strict TypeScript in frontend and backend
+- DTOs with validation, do not expose entities directly
 
-Pruebas
-- Cobertura mínima sugerida 80%
-- Backend: unit y e2e (supertest)
-- Frontend: unit (componentes y servicios)
+Testing
+- Suggested minimum coverage 80%
+- Backend: unit and e2e (supertest)
+- Frontend: unit (components and services)
 
-Revisiones
-- Al menos 1 aprobación antes de merge
-- Resolver comentarios antes de fusionar
+Reviews
+- At least 1 approval before merging
+- Resolve comments before merging
 
-Seguridad
-- No incluir secretos en commits
-- Reportar vulnerabilidades por canal privado (ver docs/security.md)
+Security
+- Do not include secrets in commits
+- Report vulnerabilities via private channel (see docs/security.md)
 
-Hoja de ruta
-- Issues etiquetados como good first issue para nuevos contribuidores
-- Usa discusiones para propuestas de nuevas features
+Roadmap
+- Issues labeled as good first issue for new contributors
+- Use discussions for new feature proposals
+
 

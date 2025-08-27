@@ -3,13 +3,13 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 RUN apk add --no-cache libc6-compat
 COPY package*.json ./
-# Usar npm ci para builds reproducibles
+# Use npm ci for reproducible builds
 RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 FROM deps AS build
 COPY angular.json tsconfig*.json ./
 COPY tailwind.config.js postcss.config.js ./
-# Copiar solo código necesario (evita .vscode u otros artefactos)
+# Copy only necessary code (avoid .vscode or other artifacts)
 COPY src ./src
 RUN npm run build
 
@@ -18,7 +18,7 @@ WORKDIR /usr/share/nginx/html
 ENV NODE_ENV=production
 RUN rm -rf ./*
 COPY --from=build /app/dist /tmp/dist
-# Lógica robusta para diferentes estructuras de salida Angular
+# Robust logic for different Angular output structures
 RUN set -eux; \
     if [ -f /tmp/dist/frontend/index.html ]; then \
       cp -r /tmp/dist/frontend/* ./; \
@@ -29,7 +29,7 @@ RUN set -eux; \
     elif [ -f /tmp/dist/browser/index.html ]; then \
       cp -r /tmp/dist/browser/* ./; \
     else \
-      echo 'No se encontró index.html en el build de Angular' && ls -R /tmp/dist && exit 1; \
+      echo 'index.html not found in Angular build output' && ls -R /tmp/dist && exit 1; \
     fi
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80

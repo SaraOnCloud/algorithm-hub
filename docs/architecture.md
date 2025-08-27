@@ -1,100 +1,99 @@
 # Arquitectura de Algorithm Hub
 
-Objetivo
-Aplicación full‑stack para aprender algoritmos, con frontend en Angular y backend en NestJS. Persistencia con TypeORM sobre MariaDB. Autenticación JWT. Se prioriza Clean Code, SOLID, pruebas automatizadas y DX.
+Objective  
+Full-stack application for learning algorithms, with Angular frontend and NestJS backend. Persistence with TypeORM on MariaDB. JWT authentication. Emphasis on Clean Code, SOLID, automated testing, and DX.
 
-Visión general
-- Frontend (Angular): SPA que permite registro/login, listar 20 algoritmos predefinidos, marcar como aprendido y ver progreso global.
-- Backend (NestJS): API REST con módulos de auth, usuarios, algoritmos y progreso. TypeORM gestiona entidades, migraciones y seed inicial.
-- Base de datos (MariaDB): Esquema normalizado con Users, Algorithms y UserAlgorithms (tabla de unión).
+Overview  
+- Frontend (Angular): SPA allowing registration/login, listing 20 predefined algorithms, marking as learned, and viewing global progress.
+- Backend (NestJS): REST API with modules for auth, users, algorithms, and progress. TypeORM manages entities, migrations, and initial seed.
+- Database (MariaDB): Normalized schema with Users, Algorithms, and UserAlgorithms (join table).
 
-Estructura del repositorio (monorepo simple)
-- frontend/ Aplicación Angular
+Repository structure (simple monorepo)
+- frontend/ Angular application
   - src/app/
-    - core/ (servicios transversales: auth, http, interceptors)
-    - shared/ (componentes y utilidades compartidas)
+    - core/ (cross-cutting services: auth, http, interceptors)
+    - shared/ (shared components and utilities)
     - features/
       - auth/
       - algorithms/
       - progress/
     - app-routing.module.ts
-- backend/ API NestJS
+- backend/ NestJS API
   - src/
     - app.module.ts
-    - config/ (configuración y validación env)
+    - config/ (env configuration and validation)
     - common/ (pipes, filters, interceptors, decorators)
     - modules/
       - auth/
       - users/
       - algorithms/
-      - progress/ (o user-algorithms)
+      - progress/ (or user-algorithms)
     - database/
       - entities/
       - migrations/
       - seeds/
-- docs/ Documentación
+- docs/ Documentation
 
 Frontend (Angular)
-- Versiones: Angular 17+, TypeScript estricto.
-- State: Servicios inyectables; NgRx opcional si el estado crece.
-- Rutas principales:
-  - /auth (login/registro)
-  - /algorithms (listado y detalle)
-  - /progress (resumen global)
-- Módulos por feature, lazy-loading cuando aplique.
-- Servicios clave:
-  - AuthService: login, register, refresh (si aplica), gestión de token en memoria/Storage.
+- Versions: Angular 17+, strict TypeScript.
+- State: Injectable services; NgRx optional if state grows.
+- Main routes:
+  - /auth (login/register)
+  - /algorithms (list and detail)
+  - /progress (global summary)
+- Feature modules, lazy-loading when applicable.
+- Key services:
+  - AuthService: login, register, refresh (if applicable), token management in memory/Storage.
   - AlgorithmsService: list, getById, toggleLearned.
-  - ProgressService: resumen y lista de aprendidos.
-- Interceptores:
-  - AuthInterceptor: añade Authorization: Bearer <token>.
-  - HttpErrorInterceptor: manejo uniforme de errores.
-- Guards: AuthGuard para rutas protegidas.
-- UI/UX: componentes accesibles, feedback de carga/errores.
-- Testing: Jest o Karma + Jasmine. Pruebas de componentes y servicios.
+  - ProgressService: summary and list of learned algorithms.
+- Interceptors:
+  - AuthInterceptor: adds Authorization: Bearer <token>.
+  - HttpErrorInterceptor: uniform error handling.
+- Guards: AuthGuard for protected routes.
+- UI/UX: accessible components, loading/error feedback.
+- Testing: Jest or Karma + Jasmine. Component and service tests.
 
 Backend (NestJS)
-- Versiones: NestJS 10+, TypeScript estricto.
-- Módulos:
-  - AuthModule: registro, login, JWT. Hash con Argon2.
-  - UsersModule: perfil del usuario autenticado.
-  - AlgorithmsModule: CRUD limitado (solo lectura pública; administración futura opcional).
-  - ProgressModule: operaciones sobre aprendizaje de algoritmos por usuario.
-- Capas por módulo:
-  - Controller: contratos HTTP y validación con DTOs (class-validator/class-transformer).
-  - Service: casos de uso y orquestación.
-  - Repository: acceso a datos con TypeORM (repositorios por entidad).
-- Configuración:
-  - ConfigModule global. Validación de env con Joi o Zod.
-  - Prefix global /api/v1. CORS habilitado para frontend.
-- Persistencia:
-  - Entidades: User, Algorithm, UserAlgorithm (ManyToMany con payload learnedAt).
-  - Migraciones versionadas y seed inicial de 20 algoritmos.
-- Seguridad:
-  - JWT Access Token. Helmet, rate limiting, CORS restringido.
-  - Hash de contraseñas con Argon2, política de contraseñas y validaciones fuertes.
-- Observabilidad:
-  - Logger de Nest (p.ej., Pino con nestjs-pino). Filtros de excepciones.
+- Versions: NestJS 10+, strict TypeScript.
+- Modules:
+  - AuthModule: registration, login, JWT. Hashing with Argon2.
+  - UsersModule: authenticated user profile.
+  - AlgorithmsModule: limited CRUD (public read-only; future admin optional).
+  - ProgressModule: operations on user algorithm learning.
+- Layers per module:
+  - Controller: HTTP contracts and validation with DTOs (class-validator/class-transformer).
+  - Service: use cases and orchestration.
+  - Repository: data access with TypeORM (entity repositories).
+- Configuration:
+  - Global ConfigModule. Env validation with Joi or Zod.
+  - Global prefix /api/v1. CORS enabled for frontend.
+- Persistence:
+  - Entities: User, Algorithm, UserAlgorithm (ManyToMany with learnedAt payload).
+  - Versioned migrations and initial seed of 20 algorithms.
+- Security:
+  - JWT Access Token. Helmet, rate limiting, restricted CORS.
+  - Password hashing with Argon2, password policy, and strong validations.
+- Observability:
+  - Nest logger (e.g., Pino with nestjs-pino). Exception filters.
 - Testing:
-  - Unit tests por servicio/controlador. e2e con supertest.
+  - Unit tests per service/controller. e2e with supertest.
 
-Flujos principales
-- Registro/login: usuario obtiene JWT y accede a rutas protegidas.
-- Listado de algoritmos: consulta paginada/filtrada.
-- Marcar como aprendido: inserta en UserAlgorithm (o borra para desmarcar).
-- Progreso global: (aprendidos/20) en porcentaje y conteos.
+Main flows
+- Registration/login: user obtains JWT and accesses protected routes.
+- Algorithm listing: paginated/filtered query.
+- Mark as learned: inserts into UserAlgorithm (or deletes to unmark).
+- Global progress: (learned/20) as percentage and counts.
 
-Migrations y seeds
-- Migraciones para crear tablas e índices.
-- Seed para insertar los 20 algoritmos con claves estables (slugs) y metadatos.
+Migrations and seeds
+- Migrations to create tables and indexes.
+- Seed to insert 20 algorithms with stable keys (slugs) and metadata.
 
-Calidad y DX
-- ESLint + Prettier. tsconfig strict.
-- Husky + lint-staged para pre-commit.
-- Conventional Commits + changelog automático opcional.
+Quality and DX
+- ESLint + Prettier. Strict tsconfig.
+- Husky + lint-staged for pre-commit.
+- Conventional Commits + optional automatic changelog.
 
-Riesgos y mitigaciones
-- Consistencia de datos: constraints y transacciones al marcar aprendido.
-- N+1 queries: usar relaciones y select adecuados.
-- Escalabilidad: cache selectiva para listado de algoritmos (opcional).
-
+Risks and mitigations
+- Data consistency: constraints and transactions when marking as learned.
+- N+1 queries: use proper relations and selects.
+- Scalability: selective cache for algorithm listing (optional).

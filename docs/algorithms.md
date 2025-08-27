@@ -1,128 +1,127 @@
 # Lista de los 20 algoritmos predefinidos
 
-Cada algoritmo incluye slug estable, categoría y dificultad. Las descripciones son breves y orientadas al aprendizaje.
+Each algorithm includes a stable slug, category, and difficulty. Descriptions are brief and learning-oriented.
 
 1) bubble-sort
-- Nombre: Bubble Sort
-- Categoría: sorting
-- Dificultad: easy
-- Descripción: Ordenamiento simple por intercambio de pares adyacentes.
+- Name: Bubble Sort
+- Category: sorting
+- Difficulty: easy
+- Description: Simple sorting by swapping adjacent pairs.
 
 2) insertion-sort
-- Nombre: Insertion Sort
-- Categoría: sorting
-- Dificultad: easy
-- Descripción: Inserta elementos en su posición correcta construyendo una lista ordenada.
+- Name: Insertion Sort
+- Category: sorting
+- Difficulty: easy
+- Description: Inserts elements into their correct position, building a sorted list.
 
 3) selection-sort
-- Nombre: Selection Sort
-- Categoría: sorting
-- Dificultad: easy
-- Descripción: Selecciona el mínimo sucesivo y lo coloca al inicio.
+- Name: Selection Sort
+- Category: sorting
+- Difficulty: easy
+- Description: Successively selects the minimum and places it at the start.
 
 4) merge-sort
-- Nombre: Merge Sort
-- Categoría: sorting
-- Dificultad: medium
-- Descripción: Divide y vencerás, combina listas ordenadas eficientemente.
+- Name: Merge Sort
+- Category: sorting
+- Difficulty: medium
+- Description: Divide and conquer, efficiently merges sorted lists.
 
 5) quick-sort
-- Nombre: Quick Sort
-- Categoría: sorting
-- Dificultad: medium
-- Descripción: Particiona en torno a un pivote y ordena recursivamente.
+- Name: Quick Sort
+- Category: sorting
+- Difficulty: medium
+- Description: Partitions around a pivot and sorts recursively.
 
 6) binary-search
-- Nombre: Binary Search
-- Categoría: search
-- Dificultad: easy
-- Descripción: Búsqueda logarítmica en arreglos ordenados.
+- Name: Binary Search
+- Category: search
+- Difficulty: easy
+- Description: Logarithmic search in sorted arrays.
 
 7) breadth-first-search
-- Nombre: Breadth-First Search (BFS)
-- Categoría: graph
-- Dificultad: easy
-- Descripción: Recorre grafos por niveles desde un nodo fuente.
+- Name: Breadth-First Search (BFS)
+- Category: graph
+- Difficulty: easy
+- Description: Traverses graphs level by level from a source node.
 
 8) depth-first-search
-- Nombre: Depth-First Search (DFS)
-- Categoría: graph
-- Dificultad: easy
-- Descripción: Recorre grafos explorando en profundidad.
+- Name: Depth-First Search (DFS)
+- Category: graph
+- Difficulty: easy
+- Description: Traverses graphs by exploring deeply.
 
 9) dijkstra
-- Nombre: Dijkstra
-- Categoría: graph
-- Dificultad: medium
-- Descripción: Caminos mínimos en grafos con pesos no negativos.
+- Name: Dijkstra
+- Category: graph
+- Difficulty: medium
+- Description: Shortest paths in graphs with non-negative weights.
 
 10) bellman-ford
-- Nombre: Bellman-Ford
-- Categoría: graph
-- Dificultad: medium
-- Descripción: Caminos mínimos con detección de ciclos negativos.
+- Name: Bellman-Ford
+- Category: graph
+- Difficulty: medium
+- Description: Shortest paths with negative cycle detection.
 
 11) floyd-warshall
-- Nombre: Floyd-Warshall
-- Categoría: graph
-- Dificultad: medium
-- Descripción: Todos los pares de caminos mínimos en grafos ponderados.
+- Name: Floyd-Warshall
+- Category: graph
+- Difficulty: medium
+- Description: All-pairs shortest paths in weighted graphs.
 
 12) kruskal
-- Nombre: Kruskal
-- Categoría: graph
-- Dificultad: medium
-- Descripción: Árbol de expansión mínima usando conjuntos disjuntos.
+- Name: Kruskal
+- Category: graph
+- Difficulty: medium
+- Description: Minimum spanning tree using disjoint sets.
 
 13) prim
-- Nombre: Prim
-- Categoría: graph
-- Dificultad: medium
-- Descripción: Árbol de expansión mínima con crecimiento incremental.
+- Name: Prim
+- Category: graph
+- Difficulty: medium
+- Description: Minimum spanning tree with incremental growth.
 
 14) kmp
-- Nombre: Knuth–Morris–Pratt (KMP)
-- Categoría: string
-- Dificultad: medium
-- Descripción: Búsqueda de patrones con prefijos/sufijos eficientes.
+- Name: Knuth–Morris–Pratt (KMP)
+- Category: string
+- Difficulty: medium
+- Description: Pattern searching with efficient prefix/suffix handling.
 
 15) rabin-karp
-- Nombre: Rabin-Karp
-- Categoría: string
-- Dificultad: medium
-- Descripción: Búsqueda de cadenas usando hashing rodante.
+- Name: Rabin-Karp
+- Category: string
+- Difficulty: medium
+- Description: String searching using rolling hash.
 
 16) knapsack-01
-- Nombre: 0/1 Knapsack
-- Categoría: dp
-- Dificultad: medium
-- Descripción: Selección óptima de ítems con restricción de capacidad.
+- Name: 0/1 Knapsack
+- Category: dp
+- Difficulty: medium
+- Description: Optimal item selection with capacity constraint.
 
 17) lis
-- Nombre: Longest Increasing Subsequence (LIS)
-- Categoría: dp
-- Dificultad: medium
-- Descripción: Subsecuencia estrictamente creciente más larga.
+- Name: Longest Increasing Subsequence (LIS)
+- Category: dp
+- Difficulty: medium
+- Description: Longest strictly increasing subsequence.
 
 18) topological-sort
-- Nombre: Topological Sort
-- Categoría: graph
-- Dificultad: easy
-- Descripción: Orden lineal de DAG basado en dependencias.
+- Name: Topological Sort
+- Category: graph
+- Difficulty: easy
+- Description: Linear ordering of DAG based on dependencies.
 
 19) activity-selection
-- Nombre: Activity Selection
-- Categoría: greedy
-- Dificultad: easy
-- Descripción: Selección de actividades compatibles maximizando cantidad.
+- Name: Activity Selection
+- Category: greedy
+- Difficulty: easy
+- Description: Selects compatible activities to maximize count.
 
 20) binary-tree-traversals
-- Nombre: Recorridos de Árbol Binario (In/Pre/Post)
-- Categoría: tree
-- Dificultad: easy
-- Descripción: Recorridos fundamentales en árboles binarios.
+- Name: Binary Tree Traversals (In/Pre/Post)
+- Category: tree
+- Difficulty: easy
+- Description: Fundamental traversals in binary trees.
 
-Notas
-- Los slugs son únicos y estables.
-- Pueden ampliarse con campos como ejemplos, complejidad temporal/espacial y links.
-
+Notes
+- Slugs are unique and stable.
+- Can be extended with fields like examples, time/space complexity, and links.

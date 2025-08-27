@@ -1,54 +1,53 @@
-# Esquema de datos
+# Data Schema
 
-Entidades principales
+Main Entities
 - User
   - id (uuid)
-  - email (único)
+  - email (unique)
   - name
   - passwordHash
   - createdAt, updatedAt
-  - Índices: email único
+  - Indexes: unique email
 
 - Algorithm
   - id (uuid)
-  - slug (único, estable)
+  - slug (unique, stable)
   - name
   - category (sorting|search|graph|dp|string|math|greedy|tree|other)
   - difficulty (easy|medium|hard)
   - description
   - createdAt, updatedAt
-  - Índices: slug único, category, difficulty
+  - Indexes: unique slug, category, difficulty
 
-- UserAlgorithm (relación N:M)
+- UserAlgorithm (N:M relationship)
   - id (uuid)
   - userId (FK -> User.id ON DELETE CASCADE)
   - algorithmId (FK -> Algorithm.id ON DELETE CASCADE)
   - learnedAt (datetime)
-  - Restricción única: (userId, algorithmId)
-  - Índices: userId, algorithmId
+  - Unique constraint: (userId, algorithmId)
+  - Indexes: userId, algorithmId
 
-Relaciones
+Relationships
 - User 1..* UserAlgorithm *..1 Algorithm
 
-Migraciones
-- Todas las modificaciones de esquema se realizan mediante migraciones versionadas.
-- Orden recomendado
+Migrations
+- All schema changes are performed via versioned migrations.
+- Recommended order:
   1) create-users
   2) create-algorithms
   3) create-user-algorithms
-  4) seed-algorithms-20-items (solo inserciones idempotentes por slug)
+  4) seed-algorithms-20-items (only idempotent inserts by slug)
 
-Semillas (seed)
-- Lista de 20 algoritmos con slugs y metadatos en docs/algorithms.md.
-- Seed debe ser idempotente: upsert por slug.
+Seeds
+- List of 20 algorithms with slugs and metadata in docs/algorithms.md.
+- Seed must be idempotent: upsert by slug.
 
-Ejemplo de consultas típicas
-- Listar algoritmos aprendidos por usuario: join UserAlgorithm -> Algorithm filtrando por userId.
-- Progreso: COUNT(UserAlgorithm WHERE userId = X) / 20.
+Example Queries
+- List algorithms learned by a user: join UserAlgorithm -> Algorithm filtering by userId.
+- Progress: COUNT(UserAlgorithm WHERE userId = X) / 20.
 
-Buenas prácticas de base de datos
-- Usar transacciones al marcar aprendido/desmarcar para evitar condiciones de carrera.
-- Validar entradas con niveles en app (DTOs) y constraints en DB.
-- Evitar N+1 con relations y select optimizados.
-- Añadir índices si aparecen cuellos de botella (p.ej., userId + algorithmId ya indexados).
-
+Database Best Practices
+- Use transactions when marking as learned/unlearned to avoid race conditions.
+- Validate inputs at the app level (DTOs) and with DB constraints.
+- Avoid N+1 with relations and optimized selects.
+- Add indexes if bottlenecks appear (e.g., userId + algorithmId already indexed).

@@ -29,7 +29,7 @@ export class AlgorithmsService {
 
     if (params.search) {
       const q = `%${params.search}%`;
-      // MariaDB/MySQL suelen ser case-insensitive por collation, usar Like es suficiente
+      // MariaDB/MySQL are usually case-insensitive due to collation, so using Like is sufficient
       where.push({ ...filters, name: Like(q) });
       where.push({ ...filters, slug: Like(q) });
       where.push({ ...filters, description: Like(q) });
@@ -49,7 +49,7 @@ export class AlgorithmsService {
 
   async findBySlugOrFail(slug: string) {
     const algo = await this.repo.findOne({ where: { slug } });
-    if (!algo) throw new NotFoundException('Algoritmo no encontrado');
+     throw new NotFoundException('Algorithm not found');
     return algo;
   }
 }

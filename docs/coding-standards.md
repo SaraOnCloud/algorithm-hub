@@ -1,80 +1,79 @@
-# Estándares de código (Clean Code)
+# Coding Standards (Clean Code)
 
-Objetivo
-Asegurar un código mantenible, legible y consistente en Algorithm Hub (Angular + NestJS, TypeScript estricto).
+Objective  
+Ensure maintainable, readable, and consistent code in Algorithm Hub (Angular + NestJS, strict TypeScript).
 
-Principios generales
-- KISS, DRY y SOLID
-- Nombres claros y específicos (dominio y propósito)
-- Pequeñas unidades: funciones < 30 líneas, clases cohesivas
-- Evitar comentarios redundantes; preferir código autoexplicativo
-- Fail fast: validar temprano con DTOs y tipos estrictos
+General Principles
+- KISS, DRY, and SOLID
+- Clear and specific names (domain and purpose)
+- Small units: functions < 30 lines, cohesive classes
+- Avoid redundant comments; prefer self-explanatory code
+- Fail fast: validate early with DTOs and strict types
 
 TypeScript
-- "strict": true en tsconfig
-- Tipar todo (parámetros, retornos, propiedades)
-- Evitar any; usar unknown y refinar
-- Preferir tipos readonly e inmutabilidad cuando aplique
+- "strict": true in tsconfig
+- Type everything (parameters, returns, properties)
+- Avoid any; use unknown and refine
+- Prefer readonly types and immutability when applicable
 
-Formateo y lint
-- ESLint + Prettier (reglas consistentes en frontend y backend)
+Formatting and Linting
+- ESLint + Prettier (consistent rules for frontend and backend)
 - Scripts:
   - lint, lint:fix, format
-- Pre-commit con Husky + lint-staged (formateo y lint parcial)
+- Pre-commit with Husky + lint-staged (partial formatting and linting)
 
-Git y commits
+Git and Commits
 - Conventional Commits (feat, fix, chore, refactor, docs, test, perf, ci)
-- PRs pequeños y enfocados, descripción clara, capturas si aplica
-- Rebase antes de merge, squash opcional
+- Small, focused PRs, clear description, screenshots if applicable
+- Rebase before merge, squash optional
 
 Frontend (Angular)
-- Estructura por features (módulos lazy cuando aplique)
-- Componentes dumb/smart: presentación vs. contenedor
-- Servicios inyectables para lógica de negocio y acceso a API
-- Usa OnPush cuando sea posible; evita trabajo innecesario en plantillas
-- Interceptores para auth y manejo de errores
-- Guards para rutas privadas
-- No lógica de negocio en componentes; extraer a servicios
-- Evitar estado global salvo necesidad; considerar NgRx si escala
-- Accesibilidad (a11y), roles/labels, estados de carga/errores
+- Structure by features (lazy modules when applicable)
+- Dumb/smart components: presentation vs. container
+- Injectable services for business logic and API access
+- Use OnPush when possible; avoid unnecessary work in templates
+- Interceptors for auth and error handling
+- Guards for private routes
+- No business logic in components; extract to services
+- Avoid global state unless necessary; consider NgRx if scaling
+- Accessibility (a11y), roles/labels, loading/error states
 
 Backend (NestJS)
-- Módulos por dominio (auth, users, algorithms, progress)
-- Capas claras: Controller (I/O), Service (casos de uso), Repository (persistencia)
-- DTOs con class-validator/class-transformer; no exponer entidades directamente
-- Excepciones de Nest (HttpException) y filtros globales para consistencia
-- ConfigModule con validación de env (Joi/Zod)
-- Repositorios TypeORM tipados; evitar consultas crudas salvo necesidad
-- Idempotencia en endpoints críticos (marcar aprendido)
+- Modules by domain (auth, users, algorithms, progress)
+- Clear layers: Controller (I/O), Service (use cases), Repository (persistence)
+- DTOs with class-validator/class-transformer; do not expose entities directly
+- Nest exceptions (HttpException) and global filters for consistency
+- ConfigModule with env validation (Joi/Zod)
+- Typed TypeORM repositories; avoid raw queries unless necessary
+- Idempotency in critical endpoints (mark as learned)
 
-Base de datos
-- Migraciones versionadas; no usar synchronize en producción
-- Seeds idempotentes por slug
-- Constraints e índices para integridad y performance
-- Transacciones al mutar relaciones N:M
+Database
+- Versioned migrations; do not use synchronize in production
+- Idempotent seeds by slug
+- Constraints and indexes for integrity and performance
+- Transactions when mutating N:M relationships
 
-Pruebas
-- Unit: servicios y utilidades (Jest)
-- e2e: endpoints críticos (supertest)
-- Cobertura mínima sugerida: 80%
-- Doble pirámide: backend y frontend con suites independientes
+Testing
+- Unit: services and utilities (Jest)
+- e2e: critical endpoints (supertest)
+- Suggested minimum coverage: 80%
+- Double pyramid: backend and frontend with independent suites
 
-Errores y logging
-- Manejo centralizado de errores HTTP
-- Logs estructurados (pino) con niveles; sin PII sensible
-- Trazas útiles: requestId/correlationId
+Errors and Logging
+- Centralized HTTP error handling
+- Structured logs (pino) with levels; no sensitive PII
+- Useful traces: requestId/correlationId
 
-Seguridad
-- Argon2 para contraseñas, JWT con expiración
-- Helmet, CORS restringido, rate limiting
-- Validación de entrada estricta y saneamiento
+Security
+- Argon2 for passwords, JWT with expiration
+- Helmet, restricted CORS, rate limiting
+- Strict input validation and sanitization
 
-Rendimiento
-- Paginación por defecto, límites de pageSize
-- Cache opcional para catálogos estáticos (algorithms)
-- Evitar N+1; usar relaciones y selects necesarios
+Performance
+- Default pagination, pageSize limits
+- Optional cache for static catalogs (algorithms)
+- Avoid N+1; use necessary relations and selects
 
-Revisión de código
-- Checklist: lint limpio, pruebas pasan, nombres claros, sin código muerto, docs actualizadas
-- Al menos 1 aprobación antes de merge a main
-
+Code Review
+- Checklist: clean lint, tests pass, clear names, no dead code, updated docs
+- At least 1 approval before merging to main

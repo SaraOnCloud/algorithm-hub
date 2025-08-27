@@ -1,19 +1,19 @@
-# Despliegue (Docker Compose)
+# Deployment (Docker Compose)
 
-Objetivo
-Levantar MariaDB, backend (NestJS), frontend (Angular) y reverse proxy Traefik con HTTPS automático (Let's Encrypt).
+Objective  
+Deploy MariaDB, backend (NestJS), frontend (Angular), and Traefik reverse proxy with automatic HTTPS (Let's Encrypt).
 
-Requisitos
-- Docker Desktop actualizado
-- Archivo backend/.env con variables de DB y JWT
-- Archivo .env (en la raíz) con DOMAIN y LE_EMAIL
-  - DOMAIN=midominio.com (sin protocolo)
-  - LE_EMAIL=correo@midominio.com (email válido para certificados)
-  - DNS: crear registros A:
-    - midominio.com -> IP del servidor
-    - api.midominio.com -> IP del servidor
+Requirements
+- Updated Docker Desktop
+- `backend/.env` file with DB and JWT variables
+- `.env` file (in the root) with DOMAIN and LE_EMAIL
+  - `DOMAIN=yourdomain.com` (without protocol)
+  - `LE_EMAIL=your@email.com` (valid email for certificates)
+  - DNS: create A records:
+    - yourdomain.com -> server IP
+    - api.yourdomain.com -> server IP
 
-## docker-compose.yml (resumen relevante)
+## docker-compose.yml (relevant summary)
 ```yaml
 services:
   traefik:
@@ -50,51 +50,52 @@ services:
       - traefik.http.services.frontend.loadbalancer.server.port=80
 ```
 
-## Pasos
-1) Preparar backend/.env con DB_HOST=db, credenciales, JWT_SECRET, etc.
-2) Crear .env en la raíz copiando .env.example y ajustando DOMAIN y LE_EMAIL.
-3) Configurar DNS (A records) hacia la IP pública antes de levantar contenedores.
-4) (Opcional pruebas) Activar CA de staging de Let's Encrypt descomentando la línea caserver en servicio traefik para evitar rate limits.
-5) Levantar servicios:
+## Steps
+1) Prepare `backend/.env` with `DB_HOST=db`, credentials, `JWT_SECRET`, etc.
+2) Create `.env` in the root by copying `.env.example` and setting DOMAIN and LE_EMAIL.
+3) Configure DNS (A records) to the public IP before starting containers.
+4) (Optional testing) Enable Let's Encrypt staging CA by uncommenting the `caserver` line in the traefik service to avoid rate limits.
+5) Start services:
 ```
-Docker compose up -d --build
+docker compose up -d --build
 ```
-6) Ver logs de Traefik y confirmar emisión de certificados:
+6) View Traefik logs and confirm certificate issuance:
 ```
-Docker compose logs -f traefik
+docker compose logs -f traefik
 ```
-7) Acceder:
+7) Access:
 - Web: https://DOMAIN
-- API: https://api.DOMAIN (añadir /api/v1 según rutas)
-8) Ejecutar migraciones / seed si procede:
+- API: https://api.DOMAIN (add /api/v1 as needed)
+8) Run migrations / seed if needed:
 ```
-Docker compose exec backend npm run typeorm:migration:run
-Docker compose exec backend npm run seed:run
+docker compose exec backend npm run typeorm:migration:run
+docker compose exec backend npm run seed:run
 ```
 
-## Producción (hardening adicional)
-- Activar middleware de cabeceras (ya incluido: HSTS, XSS filter, etc.).
-- Añadir rate limiting (Traefik plugin o a nivel app / CDN).
-- Forzar HTTPS (ya redirección automática configurada).
-- Implementar backups de volumen db_data y cifrado en reposo según infraestructura.
-- Usar staging para validar primera vez, luego volver a producción (eliminar caserver).
+## Production (additional hardening)
+- Enable header middleware (already included: HSTS, XSS filter, etc.).
+- Add rate limiting (Traefik plugin or at app/CDN level).
+- Enforce HTTPS (automatic redirect already configured).
+- Implement backups for db_data volume and at-rest encryption as per infrastructure.
+- Use staging to validate the first time, then switch back to production (remove caserver).
 
 ## Troubleshooting
-- Certificado no emitido: comprobar DNS propagado y que puertos 80/443 estén abiertos.
-- 404 desde dominio: revisar labels y variable DOMAIN cargada (docker compose config | grep DOMAIN).
-- Renovación: automática (ACME). No tocar acme.json.
-- Rate limit: usar entorno de staging temporalmente.
+- Certificate not issued: check DNS propagation and that ports 80/443 are open.
+- 404 from domain: check labels and DOMAIN variable loaded (`docker compose config | grep DOMAIN`).
+- Renewal: automatic (ACME). Do not touch acme.json.
+- Rate limit: use staging environment temporarily.
 
-## Comandos útiles
+## Useful commands
 ```
-Docker compose ps
-Docker compose logs -f traefik
-Docker compose exec backend curl -I http://localhost:3000/api/v1/algorithms
-Docker compose config
+docker compose ps
+docker compose logs -f traefik
+docker compose exec backend curl -I http://localhost:3000/api/v1/algorithms
+docker compose config
 ```
 
-## Variables clave
-- DOMAIN: dominio raíz (sin protocolo)
-- LE_EMAIL: email para ACME
+## Key variables
+- DOMAIN: root domain (no protocol)
+- LE_EMAIL: email for ACME
 - JWT_SECRET / JWT_EXPIRES_IN: backend
-- DB_*: credenciales DB
+- DB_*: DB credentials
+
